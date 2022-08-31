@@ -1,0 +1,21 @@
+[general]
+
+chrLenFile = /home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train4/scripts-tools/FREEC/hg19.len.txt
+ploidy = 2
+window = 0
+chrFiles = /home/mquinodo/SYNO/NGS/hg19/chr
+outputDir = oouutt
+
+[sample]
+
+mateFile = iinn
+inputFormat = bam
+mateOrientation = FR
+
+[control]
+
+[target]
+
+captureRegions = /home/mquinodo/SYNO/NGS/Twist/Twist_Exome_Target_hg19.canoX.bed
+
+

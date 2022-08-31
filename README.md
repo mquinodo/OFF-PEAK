@@ -7,7 +7,7 @@ It can be used under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0
 
 ## Prerequisites
 + BEDTools [[Link](https://bedtools.readthedocs.io/en/latest/content/installation.html)] (>= v2.25.0)
-+ mosdepth [[Link](https://github.com/brentp/mosdepth)] (>= v0.3.4)
++ mosdepth [[Link](https://github.com/brentp/mosdepth)] (>= v0.3.3)
 + R [[Link](https://cran.r-project.org/mirrors.html)] (>= v3.2.0)
 + R libraries: optparse, gplots, ExomeDepth, pROC and caTools
 
@@ -15,10 +15,10 @@ It can be used under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0
 The tool does not require compilation.
 
 ## Usage
-This tool contains four modules: target processing, coverage computation, CNV discovery and CNV plot.
+This tool contains four modules: 1° target processing, 2° coverage computation, 3° CNV discovery and 4° CNV plot.
 
 ### 1) Target processing
-The main script 01_targets-processing.sh takes as input a BED file which contains the target regions of the sequencing data as well as the reference genome (FASTA format). The output is a BED file containing processed on-target and off-target regions.
+The main script 01_targets-processing.sh takes as input a BED file which contains the target regions of the sequencing data as well as the reference genome (FASTA format). It is outputing a BED file containing processed on-target and off-target regions.
 It is called with bash and its computation time for an exome BED file is few minutes:
 ```
 bash 01_targets-processing.sh
@@ -39,11 +39,11 @@ Option | Value | Description
 #### Optional arguments
 Option | Default | Value | Description
 --- | --- | --- | ---
---minOntarget | 100 | 1-Inf | Minimal size of on-targets. Smaller on-target regions will be extended on each side to reach this value.
---maxOntarget | 300 | >minOntarget | Maximal size of on-targets. Larger on-target regions will be splitted in regions of equal size.
---minOfftarget | 1000 | 1-Inf | Minimal size of off-targets. Smaller on-target regions will be discarded.
---maxOfftarget | 50000 | >minOfftarget | Maximal size of off-targets. Larger on-target regions will be splitted in regions of equal size.
---paddingOfftarget | 300 | 0-Inf | Padding around on-target regions to avoid reads in off-target regions.
+--minOntarget | 100 | 1 - Inf | Minimal size of on-targets. Smaller on-target regions will be extended on each side to reach this value.
+--maxOntarget | 300 | > minOntarget | Maximal size of on-targets. Larger on-target regions will be splitted into regions of equal size.
+--minOfftarget | 1000 | 1 - Inf | Minimal size of off-targets. Smaller on-target regions will be discarded.
+--maxOfftarget | 50000 | > minOfftarget | Maximal size of off-targets. Larger on-target regions will be splitted into regions of equal size.
+--paddingOfftarget | 300 | 0 - Inf | Padding around on-target regions to avoid targeted reads to be counted in off-target regions.
 
 
 ### 2) Coverage computation
@@ -59,10 +59,10 @@ bash 02_coverage-count.sh
 #### Required arguments
 Option | Value | Description
 --- | --- | ---
---listBAM | STRING | Text file containing two tab-delimited columns: BAM files and IDs. It can also have only BAM files and IDs will be deduced from the name of BAM files (not recommended).
---mosdepth | STRING | Mosdepth executable file that can be downloaded on the github page [[Link](https://github.com/brentp/mosdepth)]
+--listBAM | STRING | Text file containing two tab-delimited columns: BAM files and IDs. It can also have only one column with BAM files. In this case, IDs will be deduced from the name of BAM files (not recommended).
+--mosdepth | STRING | Mosdepth executable file that can be downloaded from the github page here: [[Link](https://github.com/brentp/mosdepth/releases/download/v0.3.3/mosdepth)]
 --work | STRING | Output directory
---targetsBED | STRING | BED file with processed targets produced in step 1.
+--targetsBED | STRING | BED file with processed targets produced in step 1
 
 
 ### 3) CNV discovery
@@ -80,19 +80,19 @@ Option | Value | Description
 --- | --- | ---
 --output | STRING | BED file containing the target regions of the exome or targeted sequencing
 --data | STRING | Genome build used
---databasefile | STRING | Absolute path to RData file containing various information (data-hg19.RData or data-hg38.RData)
+--databasefile | STRING | Absolute path to RData file containing various information found in data folder (data-hg19.RData or data-hg38.RData)
 
 #### Optional arguments
 Option | Default | Value | Description
 --- | --- | --- | ---
---mincor | 0.9 | 0-0.99 | Minimal correlation of control samples compared to analyzed one.
---minsignal | 2500 | 1-Inf | Minimal signal for a target to be analyzed.
---maxvar | -0.2 | -1-1 | Maximal variance for a target to be analyzed.
+--mincor | 0.9 | 0 - 0.99 | Minimal correlation of control samples compared to analyzed one.
+--minsignal | 2500 | 1 - Inf | Minimal signal for a target to be analyzed.
+--maxvar | -0.2 | -1 - 1 | Maximal variance for a target to be analyzed.
 --leaveoneout | 1 | 0 or 1 | If 1, leave-one-out PCA (LOO-PCA) will be used. If 0, standard PCA will be used.
---downsample | 20000 | 100-Inf | Number of downsampled targets for optimization of PC removal.
---nbFake | 500 | 10-10000 | Number of fake CNVs used for optimization of PC removal.
---stopPC | 0.0001 | 0-0.1 | Stopping criteria for optimization of PC removal.
---minZ | 4 | 2-10 | Minimal absolute Z-score for single target CNV processing.
+--downsample | 20000 | 100 - Inf | Number of downsampled targets for optimization of PC removal.
+--nbFake | 500 | 10 - 10000 | Number of fake CNVs used for optimization of PC removal.
+--stopPC | 0.0001 | 0 - 0.1 | Stopping criteria for optimization of PC removal.
+--minZ | 4 | 2 - 10 | Minimal absolute Z-score for single target CNV processing.
 --chromosome-plots | - | - | If present, coverage plots for each chromosome will be done.
 --genome-plots | - | - | If present, genome-wide coverage plots will be done.
 
@@ -124,7 +124,7 @@ Option | Value | Description
 #### Optional arguments
 Option | Default | Value | Description
 --- | --- | --- | ---
---side | 10 | 1-100 | Number of target plotted on each side of the region.
+--side | 10 | 1 - 100 | Number of target plotted on each side of the region.
 
 
 

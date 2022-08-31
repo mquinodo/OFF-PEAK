@@ -7,18 +7,23 @@ This software was written by Mathieu Quinodoz in the group of Prof. Rivolta from
 + BEDTools [[Link](https://bedtools.readthedocs.io/en/latest/content/installation.html)] (>= v2.25.0)
 + mosdepth [[Link](https://github.com/brentp/mosdepth)] (>= v0.3.4)
 + R [[Link](https://cran.r-project.org/mirrors.html)] (>= v3.2.0)
-+ R libraries optparse, gplots, ExomeDepth, pROC and caTools
++ R libraries: optparse, gplots, ExomeDepth, pROC and caTools
 
 ## Installation
 The tool does not require compilation.
 
 ## Usage
 This tool contains four modules: target processing, coverage computation, CNV discovery and CNV plot.
-### Target processing
+### 1) Target processing
 The main script 01_targets-processing.sh takes as input a BED file which contains the target regions of the sequencing data as well as the reference genome (FASTA format). The output is a BED file containing processed on-target and off-target regions.
 It is called with bash and its computation time for an exome BED file is few minutes:
 ```
-bash 01_targets-processing.sh --genome [hg19|hg38] --targets target.bed --out output-name --ref ref_genome.fa [other options]
+bash 01_targets-processing.sh
+  --genome [hg19|hg38]
+  --targets target.bed
+  --out output-name
+  --ref ref_genome.fa
+  [other options]
 ```
 #### Required arguments
 Option | Value | Description

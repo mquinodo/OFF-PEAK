@@ -45,20 +45,33 @@ fi
 if [ -z "${targetsBED}" ]; then
     notargetsBED
 fi
-if [[ `awk -F"\t" 'NF==1' $listBAM` ]]; then
-    errorlistBAM
-fi
 
 sed -i '/^$/d' $listBAM
 
+mkdir -p $work
 cut -f1-4 $targetsBED > $work/targetsBED.bed
 
 echo "Step 1: Using mosdepth to extract coverage for each on-target and off-target"
+if [[ `awk -F"\t" 'NF==1' $listBAM` ]]; then
+    echo "   Only one field detected. ID will be deduced from the BAM file name"
+fi
+rm -f $work/list.txt
+touch $work/list.txt
 # coverage from the bam files with mosdepth 
 while read file
 do
-	pat=$(echo $file | cut -f2 -d" ")
-	bam=$(echo $file | cut -f1 -d" ")
+	a=$(echo $file | awk -F" " '{print NF}')
+	if [[ "$a" == 1 ]]; then
+		pat=$(echo $file | cut -f1 -d" " | awk -F"\t" '{n=split($1,a,"/"); split(a[n],b,".bam"); print b[1]}')
+		bam=$(echo $file | cut -f1 -d" ")
+		echo $pat
+	fi
+	if [ $a -gt 1 ]; then
+		echo "more than 1 field"
+		pat=$(echo $file | cut -f2 -d" ")
+		bam=$(echo $file | cut -f1 -d" ")
+	fi
+	echo $pat >> $work/list.txt
 	if [ ! -f $work/coverage/$pat.cov.tsv ] || [ ! -s $work/coverage/$pat.cov.tsv ]; then
 		echo "   Processing sample $pat"
 		# downloaded here: https://github.com/brentp/mosdepth/releases/download/v0.3.2/mosdepth
@@ -81,7 +94,7 @@ echo "Step 2: Merging individual coverage files into one file"
 printf "Chr\tbegin\tend\tname\tGC" > $work/header.target.tsv
 cut -f1-5 $targetsBED  > $work/target.only.tsv
 
-for pat in $(cut -f2 $listBAM)
+for pat in $(cat $work/list.txt)
 do
 	echo "   Processing sample $pat"
 	cut -f5 $work/coverage/$pat.cov.tsv > $work/$pat.cov.only.tsv
@@ -93,5 +106,5 @@ done
 echo "" >> $work/header.target.tsv
 cat $work/header.target.tsv $work/target.only.tsv > $work/ALL.target.tsv
 
-rm $work/temp.tsv $work/header.target.tsv $work/*.only.tsv
+rm $work/temp.tsv $work/header.target.tsv $work/*.only.tsv $work/list.txt
 

@@ -53,7 +53,6 @@ bash 02_coverage-count.sh
   --mosdepth mosdepth-executable
   --work output_directory
   --targetsBED processed-targets.bed
-  [other options]
 ```
 #### Required arguments
 Option | Value | Description
@@ -62,6 +61,68 @@ Option | Value | Description
 --mosdepth | STRING | Mosdepth executable file that can be downloaded on the github page [[Link](https://github.com/brentp/mosdepth)]
 --work | STRING | Output directory
 --targetsBED | STRING | BED file with processed targets produced in step 1.
+
+
+### 3) CNV discovery
+The main script 03_OFF-PEAK.R takes as input the coverage data per target computed in step 2 and outputs multiple files including annotated CNVs, CNV plots and statistics. 
+It is called with Rscript and its computation time is ~1 hour per 10 samples:
+```
+Rscript 03_OFF-PEAK.R
+  --output output_directory
+  --data target-coverage.tsv
+  --databasefile data-hg19.RData
+  [other options]
+```
+#### Required arguments
+Option | Value | Description
+--- | --- | ---
+--output | STRING | BED file containing the target regions of the exome or targeted sequencing
+--data | STRING | Genome build used
+--databasefile | STRING | Absolute path to RData file containing various information (data-hg19.RData or data-hg38.RData)
+
+#### Optional arguments
+Option | Default | Value | Description
+--- | --- | --- | ---
+--mincor | 0.9 | 0-0.99 | Minimal correlation of control samples compared to analyzed one.
+--minsignal | 2500 | 1-Inf | Minimal signal for a target to be analyzed.
+--maxvar | -0.2 | -1-1 | Maximal variance for a target to be analyzed.
+--leaveoneout | 1 | 0 or 1 | If 1, leave-one-out PCA (LOO-PCA) will be used. If 0, standard PCA will be used.
+--downsample | 20000 | 100-Inf | Number of downsampled targets for optimization of PC removal.
+--nbFake | 500 | 10-10000 | Number of fake CNVs used for optimization of PC removal.
+--stopPC | 0.0001 | 0-0.1 | Stopping criteria for optimization of PC removal.
+--minZ | 4 | 2-10 | Minimal absolute Z-score for single target CNV processing.
+--chromosome-plots | - | - | If present, coverage plots for each chromosome will be done.
+--genome-plots | - | - | If present, genome-wide coverage plots will be done.
+
+### 3) CNV plotting
+In step 3 , the 20 best CNVs per sample will be automatically plotted. This script is used to further plot other CNVs. The main script 04_OFF-PEAK-plot.R takes as input intermediate data from step 3 in order to do additional plots.
+It is called with Rscript and its computation time is few seconds per CNV:
+```
+Rscript 04_OFF-PEAK-plot.R
+  --ID ID
+  --chr chr
+  --begin begin
+  --end end
+  --data 05_RData-files/data-ID.RData
+  --out output-directory
+  --databasefile data-hg19.RData
+  [other options]
+```
+#### Required arguments
+Option | Value | Description
+--- | --- | ---
+--ID | STRING | Sample ID
+--chr | STRING | Chromosome
+--begin | number | Begin position of CNV
+--end | number | End position of CNV
+--data | STRING | Intermediate RData file outputted in step 3 (in 05_RData-files folder)
+--out | STRING | Output directory
+--databasefile | STRING | Absolute path to RData file containing various information (data-hg19.RData or data-hg38.RData)
+
+#### Optional arguments
+Option | Default | Value | Description
+--- | --- | --- | ---
+--side | 10 | 1-100 | Number of target plotted on each side of the region.
 
 
 

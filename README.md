@@ -2,6 +2,7 @@
 CNV detection tool for WES data
 
 This software was written by Mathieu Quinodoz in the group of Prof. Rivolta from the IOB in Basel, Switzerland. It was developped on Ubuntu 22.04.1 LTS.
+
 It can be used under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. For commercial uses of OFF-PEAK, please contact mathieu.quinodoz[at]iob.ch.
 
 ## Prerequisites

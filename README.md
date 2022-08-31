@@ -94,7 +94,7 @@ Option | Default | Value | Description
 --chromosome-plots | - | - | If present, coverage plots for each chromosome will be done.
 --genome-plots | - | - | If present, genome-wide coverage plots will be done.
 
-### 3) CNV plotting
+### 4) CNV plotting
 In step 3 , the 20 best CNVs per sample will be automatically plotted. This script is used to further plot other CNVs. The main script 04_OFF-PEAK-plot.R takes as input intermediate data from step 3 in order to do additional plots.
 It is called with Rscript and its computation time is few seconds per CNV:
 ```

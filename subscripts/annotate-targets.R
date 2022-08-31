@@ -5,9 +5,6 @@ args = commandArgs(trailingOnly=TRUE)
 a=read.table(file=args[1],header=F)
 b=read.table(file=args[2],header=F)
 
-#a=read.table(file="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-02/refs/../refs/hg19_ncbiRefSeq.exons.sort.merge.bed",header=F)
-#b=read.table(file="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-02/refs/Twist_ComprehensiveExome_targets_hg19.bed",header=F)
-
 a=cbind(a,a[,4])
 a[,5]="No"
 
@@ -61,8 +58,6 @@ for (i in 1:dim(a)[1]){
 	}
 	if(length(overlap)>0){
 		a[i,5]="Yes"
-		#a[i,2]=temp2[overlap,2]
-		#a[i,3]=temp2[overlap,3]
 	}
 }
 

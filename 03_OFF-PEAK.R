@@ -36,7 +36,13 @@ option_list = list(
               help="minimum abs(Z-score) for single-exon CNVs", metavar="numeric"),
 
   make_option(c("--databasefile"), type="character", default="NA", 
-              help="RData file for CNV annotation", metavar="character")
+              help="RData file for CNV annotation", metavar="character"),
+
+  make_option(c("--chromosome-plots"), action="store_true", default=FALSE, 
+              help="Will do coverage plots per chromosome"),
+
+  make_option(c("--genome-plots"), action="store_true", default=FALSE, 
+              help="Will do genome-wide coverage plots")
 ); 
  
 opt_parser = OptionParser(option_list=option_list);
@@ -53,6 +59,8 @@ nbFake=as.numeric(args[8])
 stopPC=as.numeric(args[9])
 minZ=as.numeric(args[10])
 databasefile=as.character(args[11])
+chromoPlots=as.logical(args[12])
+genomePlots=as.logical(args[13])
 
 if(data=="NA"){
   stop("You need to include the files containing the readcount per target with the --data option. Exit.")
@@ -618,9 +626,9 @@ for(pat in colnames(dataALL)[5:num]){
   dir.create(paste(folder,"/",pat,sep=""), showWarnings = FALSE)
   dir.create(paste(folder,"/",pat,"/plots_on-targets_off-targets",sep=""), showWarnings = FALSE)
   dir.create(paste(folder,"/",pat,"/plots_on-targets-only",sep=""), showWarnings = FALSE)
-  dir.create(paste(folder,"/",pat,"/plots_genome",sep=""), showWarnings = FALSE)
-  dir.create(paste(folder,"/",pat,"/plots_chromosomes",sep=""), showWarnings = FALSE)
-
+  if(genomePlots){dir.create(paste(folder,"/",pat,"/plots_genome",sep=""), showWarnings = FALSE)}
+  if(chromoPlots){dir.create(paste(folder,"/",pat,"/plots_chromosomes",sep=""), showWarnings = FALSE)}
+  
   print(paste("  Step 1: selectiong samples with correlation > ",mincor,sep=""))
 
   {
@@ -967,119 +975,89 @@ for(pat in colnames(dataALL)[5:num]){
 
     # genome plot by target
     raw=dataALL[,selpat]/apply(dataALL[,5:num],1,mean)
-    n1=20
-    n2=200
-    n3=5000
-    pdf(file=paste(folder,"/",pat,"/plots_genome/",pat,"-genome_by-target.pdf",sep=""),width=16,height=16)
-    par(mfrow=c(2,1))
-    plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,dim(dataALL)[1]),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab="Chromosomes",main=paste("Genome plot by target (raw) for",pat,sep=" "),xaxs = "i",yaxs = "i")
-    loc=0
-    for(chr in unique(dataALL[,1])){
-      temp=loc
-      loc=max(which(dataALL[,1]==chr))
-      text((loc+temp)/2,-0.1,chr,cex=1,xpd=NA,srt=90)
-      lines((temp+1):loc,runmean(raw[which(dataALL[,1]==chr)],n1),col=4)
-      lines((temp+1):loc,runmean(raw[which(dataALL[,1]==chr)],n2),col=2)
-      lines((temp+1):loc,runmean(raw[which(dataALL[,1]==chr)],n3),col=3)
-      abline(v=loc)
-    }
-    abline(v=0)
-    abline(h=0.5,lty=2,col="darkgrey")
-    abline(h=1,lty=2,col=1)
-    abline(h=1.5,lty=2,col="darkgrey")
-    legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
-
-    plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,dim(all)[1]),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab="Chromosomes",main=paste("Genome plot by target (filtered and corrected) for",pat,sep=" "),xaxs = "i",yaxs = "i")
-    loc=0
-    for(chr in unique(all[,1])){
-      temp=loc
-      loc=max(which(all[,1]==chr))
-      lines((temp+1):loc,runmean(all[which(all[,1]==chr),14],n1),col=4)
-      lines((temp+1):loc,runmean(all[which(all[,1]==chr),14],n2),col=2)
-      lines((temp+1):loc,runmean(all[which(all[,1]==chr),14],n3),col=3)
-      abline(v=loc)
-      text((loc+temp)/2,-0.1,chr,cex=1,xpd=NA,srt=90)
-    }
-    abline(v=0)
-    abline(h=0.5,lty=2,col="darkgrey")
-    abline(h=1,lty=2,col=1)
-    abline(h=1.5,lty=2,col="darkgrey")
-    legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
-    dev.off()
-
-    # genome plot by coordinate
-    n1=20
-    n2=200
-    n3=5000
-    size=0
-    for (chr in unique(dataALL[,1])){
-      size=size+max(as.numeric(dataALL[which(dataALL[,1]==chr),3]))
-    }
-    pdf(file=paste(folder,"/",pat,"/plots_genome/",pat,"-genome_by-coord.pdf",sep=""),width=16,height=16)
-    par(mfrow=c(2,1))
-    plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,size),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab="Chromosomes",main=paste("Genome plot by coordinate (raw) for",pat,sep=" "),xaxs = "i",yaxs = "i")
-    loc=0
-    for(chr in unique(dataALL[,1])){
-      temp=loc
-      loc=loc+max(as.numeric(dataALL[which(dataALL[,1]==chr),3]))
-      text((loc+temp)/2,-0.1,chr,cex=1,xpd=NA,srt=90)
-      lines(temp+as.numeric(dataALL[which(dataALL[,1]==chr),2]),runmean(raw[which(dataALL[,1]==chr)],n1),col=4)
-      lines(temp+as.numeric(dataALL[which(dataALL[,1]==chr),2]),runmean(raw[which(dataALL[,1]==chr)],n2),col=2)
-      lines(temp+as.numeric(dataALL[which(dataALL[,1]==chr),2]),runmean(raw[which(dataALL[,1]==chr)],n3),col=3)
-      abline(v=loc)
-    }
-    abline(v=0)
-    abline(h=0.5,lty=2,col="darkgrey")
-    abline(h=1,lty=2,col=1)
-    abline(h=1.5,lty=2,col="darkgrey")
-    legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
-
-    size=0
-    for (chr in unique(all[,1])){
-      size=size+max(as.numeric(all[which(all[,1]==chr),3]))
-    }
-    plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,size),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab="Chromosomes",main=paste("Genome plot by coordinate (filtered and corrected) for",pat,sep=" "),xaxs = "i",yaxs = "i")
-    loc=0
-    for(chr in unique(all[,1])){
-      temp=loc
-      loc=loc+max(as.numeric(all[which(all[,1]==chr),3]))
-      lines(temp+as.numeric(all[which(all[,1]==chr),2]),runmean(all[which(all[,1]==chr),14],n1),col=4)
-      lines(temp+as.numeric(all[which(all[,1]==chr),2]),runmean(all[which(all[,1]==chr),14],n2),col=2)
-      lines(temp+as.numeric(all[which(all[,1]==chr),2]),runmean(all[which(all[,1]==chr),14],n3),col=3)
-      abline(v=loc)
-      text((loc+temp)/2,-0.1,chr,cex=1,xpd=NA,srt=90)
-    }
-    abline(v=0)
-    abline(h=0.5,lty=2,col="darkgrey")
-    abline(h=1,lty=2,col=1)
-    abline(h=1.5,lty=2,col="darkgrey")
-    legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
-    dev.off()
-
-
-    # CHROMOSOME plots by coord
-    n1=20
-    n2=200
-    n3=5000
-    for(chr in unique(dataALL[,1])){
-      pdf(file=paste(folder,"/",pat,"/plots_chromosomes/",pat,"-",chr,"_by-coord.pdf",sep=""),width=16,height=16)
+    if(genomePlots){
+      n1=20
+      n2=200
+      n3=5000
+      pdf(file=paste(folder,"/",pat,"/plots_genome/",pat,"-genome_by-target.pdf",sep=""),width=16,height=16)
       par(mfrow=c(2,1))
-      plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,max(as.numeric(dataALL[which(dataALL[,1]==chr),3]))),col=4,ylab="Observed / Expected read ratio",xlab="Position on chromosome",main=paste(chr,"plot by coordinate (raw) for",pat,sep=" "),xaxs = "i",yaxs = "i")
-      loc=max(as.numeric(dataALL[which(dataALL[,1]==chr),3]))
-      lines(as.numeric(dataALL[which(dataALL[,1]==chr),2]),runmean(raw[which(dataALL[,1]==chr)],n1),col=4)
-      lines(as.numeric(dataALL[which(dataALL[,1]==chr),2]),runmean(raw[which(dataALL[,1]==chr)],n2),col=2)
-      lines(as.numeric(dataALL[which(dataALL[,1]==chr),2]),runmean(raw[which(dataALL[,1]==chr)],n3),col=3)
+      plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,dim(dataALL)[1]),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab="Chromosomes",main=paste("Genome plot by target (raw) for",pat,sep=" "),xaxs = "i",yaxs = "i")
+      loc=0
+      for(chr in unique(dataALL[,1])){
+        temp=loc
+        loc=max(which(dataALL[,1]==chr))
+        text((loc+temp)/2,-0.1,chr,cex=1,xpd=NA,srt=90)
+        lines((temp+1):loc,runmean(raw[which(dataALL[,1]==chr)],n1),col=4)
+        lines((temp+1):loc,runmean(raw[which(dataALL[,1]==chr)],n2),col=2)
+        lines((temp+1):loc,runmean(raw[which(dataALL[,1]==chr)],n3),col=3)
+        abline(v=loc)
+      }
       abline(v=0)
       abline(h=0.5,lty=2,col="darkgrey")
       abline(h=1,lty=2,col=1)
       abline(h=1.5,lty=2,col="darkgrey")
       legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
 
-      plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,max(as.numeric(all[which(all[,1]==chr),3]))),col=4,ylab="Observed / Expected read ratio",xlab="Position on chromosome",main=paste(chr,"plot by coordinate (filtered and corrected) for",pat,sep=" "),xaxs = "i",yaxs = "i")
-      loc=max(as.numeric(all[which(all[,1]==chr),3]))
-      lines(as.numeric(all[which(all[,1]==chr),2]),runmean(all[which(all[,1]==chr),14],n1),col=4)
-      lines(as.numeric(all[which(all[,1]==chr),2]),runmean(all[which(all[,1]==chr),14],n2),col=2)
-      lines(as.numeric(all[which(all[,1]==chr),2]),runmean(all[which(all[,1]==chr),14],n3),col=3)
+      plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,dim(all)[1]),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab="Chromosomes",main=paste("Genome plot by target (filtered and corrected) for",pat,sep=" "),xaxs = "i",yaxs = "i")
+      loc=0
+      for(chr in unique(all[,1])){
+        temp=loc
+        loc=max(which(all[,1]==chr))
+        lines((temp+1):loc,runmean(all[which(all[,1]==chr),14],n1),col=4)
+        lines((temp+1):loc,runmean(all[which(all[,1]==chr),14],n2),col=2)
+        lines((temp+1):loc,runmean(all[which(all[,1]==chr),14],n3),col=3)
+        abline(v=loc)
+        text((loc+temp)/2,-0.1,chr,cex=1,xpd=NA,srt=90)
+      }
+      abline(v=0)
+      abline(h=0.5,lty=2,col="darkgrey")
+      abline(h=1,lty=2,col=1)
+      abline(h=1.5,lty=2,col="darkgrey")
+      legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
+      dev.off()
+
+      # genome plot by coordinate
+      n1=20
+      n2=200
+      n3=5000
+      size=0
+      for (chr in unique(dataALL[,1])){
+        size=size+max(as.numeric(dataALL[which(dataALL[,1]==chr),3]))
+      }
+      pdf(file=paste(folder,"/",pat,"/plots_genome/",pat,"-genome_by-coord.pdf",sep=""),width=16,height=16)
+      par(mfrow=c(2,1))
+      plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,size),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab="Chromosomes",main=paste("Genome plot by coordinate (raw) for",pat,sep=" "),xaxs = "i",yaxs = "i")
+      loc=0
+      for(chr in unique(dataALL[,1])){
+        temp=loc
+        loc=loc+max(as.numeric(dataALL[which(dataALL[,1]==chr),3]))
+        text((loc+temp)/2,-0.1,chr,cex=1,xpd=NA,srt=90)
+        lines(temp+as.numeric(dataALL[which(dataALL[,1]==chr),2]),runmean(raw[which(dataALL[,1]==chr)],n1),col=4)
+        lines(temp+as.numeric(dataALL[which(dataALL[,1]==chr),2]),runmean(raw[which(dataALL[,1]==chr)],n2),col=2)
+        lines(temp+as.numeric(dataALL[which(dataALL[,1]==chr),2]),runmean(raw[which(dataALL[,1]==chr)],n3),col=3)
+        abline(v=loc)
+      }
+      abline(v=0)
+      abline(h=0.5,lty=2,col="darkgrey")
+      abline(h=1,lty=2,col=1)
+      abline(h=1.5,lty=2,col="darkgrey")
+      legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
+
+      size=0
+      for (chr in unique(all[,1])){
+        size=size+max(as.numeric(all[which(all[,1]==chr),3]))
+      }
+      plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,size),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab="Chromosomes",main=paste("Genome plot by coordinate (filtered and corrected) for",pat,sep=" "),xaxs = "i",yaxs = "i")
+      loc=0
+      for(chr in unique(all[,1])){
+        temp=loc
+        loc=loc+max(as.numeric(all[which(all[,1]==chr),3]))
+        lines(temp+as.numeric(all[which(all[,1]==chr),2]),runmean(all[which(all[,1]==chr),14],n1),col=4)
+        lines(temp+as.numeric(all[which(all[,1]==chr),2]),runmean(all[which(all[,1]==chr),14],n2),col=2)
+        lines(temp+as.numeric(all[which(all[,1]==chr),2]),runmean(all[which(all[,1]==chr),14],n3),col=3)
+        abline(v=loc)
+        text((loc+temp)/2,-0.1,chr,cex=1,xpd=NA,srt=90)
+      }
       abline(v=0)
       abline(h=0.5,lty=2,col="darkgrey")
       abline(h=1,lty=2,col=1)
@@ -1088,35 +1066,68 @@ for(pat in colnames(dataALL)[5:num]){
       dev.off()
     }
 
-    # CHROMOSOME plots by targets
-    n1=20
-    n2=200
-    n3=5000
-    for(chr in unique(dataALL[,1])){
-      pdf(file=paste(folder,"/",pat,"/plots_chromosomes/",pat,"-",chr,"_by-target.pdf",sep=""),width=16,height=16)
-      par(mfrow=c(2,1))
-      loc=length(which(dataALL[,1]==chr))
-      plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,loc),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab=chr,main=paste(chr,"plot by coordinate (raw) for",pat,sep=" "),xaxs = "i",yaxs = "i")
-      lines(1:loc,runmean(raw[which(dataALL[,1]==chr)],n1),col=4)
-      lines(1:loc,runmean(raw[which(dataALL[,1]==chr)],n2),col=2)
-      lines(1:loc,runmean(raw[which(dataALL[,1]==chr)],n3),col=3)
-      abline(v=0)
-      abline(h=0.5,lty=2,col="darkgrey")
-      abline(h=1,lty=2,col=1)
-      abline(h=1.5,lty=2,col="darkgrey")
-      legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
-      
-      loc=length(which(all[,1]==chr))
-      plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,loc),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab=chr,main=paste(chr,"plot by coordinate (filtered and corrected) for",pat,sep=" "),xaxs = "i",yaxs = "i")
-      lines(1:loc,runmean(all[which(all[,1]==chr),14],n1),col=4)
-      lines(1:loc,runmean(all[which(all[,1]==chr),14],n2),col=2)
-      lines(1:loc,runmean(all[which(all[,1]==chr),14],n3),col=3)
-      abline(v=0)
-      abline(h=0.5,lty=2,col="darkgrey")
-      abline(h=1,lty=2,col=1)
-      abline(h=1.5,lty=2,col="darkgrey")
-      legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
-      dev.off()
+    if(chromoPlots){
+      # CHROMOSOME plots by coord
+      n1=20
+      n2=200
+      n3=5000
+      for(chr in unique(dataALL[,1])){
+        pdf(file=paste(folder,"/",pat,"/plots_chromosomes/",pat,"-",chr,"_by-coord.pdf",sep=""),width=16,height=16)
+        par(mfrow=c(2,1))
+        plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,max(as.numeric(dataALL[which(dataALL[,1]==chr),3]))),col=4,ylab="Observed / Expected read ratio",xlab="Position on chromosome",main=paste(chr,"plot by coordinate (raw) for",pat,sep=" "),xaxs = "i",yaxs = "i")
+        loc=max(as.numeric(dataALL[which(dataALL[,1]==chr),3]))
+        lines(as.numeric(dataALL[which(dataALL[,1]==chr),2]),runmean(raw[which(dataALL[,1]==chr)],n1),col=4)
+        lines(as.numeric(dataALL[which(dataALL[,1]==chr),2]),runmean(raw[which(dataALL[,1]==chr)],n2),col=2)
+        lines(as.numeric(dataALL[which(dataALL[,1]==chr),2]),runmean(raw[which(dataALL[,1]==chr)],n3),col=3)
+        abline(v=0)
+        abline(h=0.5,lty=2,col="darkgrey")
+        abline(h=1,lty=2,col=1)
+        abline(h=1.5,lty=2,col="darkgrey")
+        legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
+
+        plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,max(as.numeric(all[which(all[,1]==chr),3]))),col=4,ylab="Observed / Expected read ratio",xlab="Position on chromosome",main=paste(chr,"plot by coordinate (filtered and corrected) for",pat,sep=" "),xaxs = "i",yaxs = "i")
+        loc=max(as.numeric(all[which(all[,1]==chr),3]))
+        lines(as.numeric(all[which(all[,1]==chr),2]),runmean(all[which(all[,1]==chr),14],n1),col=4)
+        lines(as.numeric(all[which(all[,1]==chr),2]),runmean(all[which(all[,1]==chr),14],n2),col=2)
+        lines(as.numeric(all[which(all[,1]==chr),2]),runmean(all[which(all[,1]==chr),14],n3),col=3)
+        abline(v=0)
+        abline(h=0.5,lty=2,col="darkgrey")
+        abline(h=1,lty=2,col=1)
+        abline(h=1.5,lty=2,col="darkgrey")
+        legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
+        dev.off()
+      }
+
+      # CHROMOSOME plots by targets
+      n1=20
+      n2=200
+      n3=5000
+      for(chr in unique(dataALL[,1])){
+        pdf(file=paste(folder,"/",pat,"/plots_chromosomes/",pat,"-",chr,"_by-target.pdf",sep=""),width=16,height=16)
+        par(mfrow=c(2,1))
+        loc=length(which(dataALL[,1]==chr))
+        plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,loc),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab=chr,main=paste(chr,"plot by coordinate (raw) for",pat,sep=" "),xaxs = "i",yaxs = "i")
+        lines(1:loc,runmean(raw[which(dataALL[,1]==chr)],n1),col=4)
+        lines(1:loc,runmean(raw[which(dataALL[,1]==chr)],n2),col=2)
+        lines(1:loc,runmean(raw[which(dataALL[,1]==chr)],n3),col=3)
+        abline(v=0)
+        abline(h=0.5,lty=2,col="darkgrey")
+        abline(h=1,lty=2,col=1)
+        abline(h=1.5,lty=2,col="darkgrey")
+        legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
+        
+        loc=length(which(all[,1]==chr))
+        plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,loc),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab=chr,main=paste(chr,"plot by coordinate (filtered and corrected) for",pat,sep=" "),xaxs = "i",yaxs = "i")
+        lines(1:loc,runmean(all[which(all[,1]==chr),14],n1),col=4)
+        lines(1:loc,runmean(all[which(all[,1]==chr),14],n2),col=2)
+        lines(1:loc,runmean(all[which(all[,1]==chr),14],n3),col=3)
+        abline(v=0)
+        abline(h=0.5,lty=2,col="darkgrey")
+        abline(h=1,lty=2,col=1)
+        abline(h=1.5,lty=2,col="darkgrey")
+        legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
+        dev.off()
+      }
     }
 
   }
@@ -1993,5 +2004,4 @@ print("Writing outputs and plots for on-targets only")
   }
 
 }
-
 

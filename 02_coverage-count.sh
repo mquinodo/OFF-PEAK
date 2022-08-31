@@ -49,17 +49,6 @@ if [[ `awk -F"\t" 'NF==1' $listBAM` ]]; then
     errorlistBAM
 fi
 
-# here=/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train3
-# batch=CeGat_2020-12
-# script=$here/scripts/02_bam-count.sh
-# work=$here/$batch
-# listBAM=$work/$batch.bam_list.txt
-# mosdepth=/home/mquinodo/mosdepth
-# work=$here/CeGat_2020-12
-# mkdir -p $work
-# targetsBED=$here/refs/Twist-CE.bed
-
-# head bam_list_train.txt | cut -f1 | awk -F"\t" '{n=split($1,a,"/"); split(a[n],b,".bam"); print $1 "\t" b[1]}'
 sed -i '/^$/d' $listBAM
 
 cut -f1-4 $targetsBED > $work/targetsBED.bed

@@ -87,29 +87,14 @@ if [ -z "${paddingOfftarget}" ]; then
     echo " -> No use of --paddingOfftarget option, value set as default: 300"
 fi
 
-# here=/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train3/refs
-# script=$here/scripts/01_targets-offtargets.sh
-# # Parameters
-# genome=hg19
-# minOntarget=100
-# maxOntarget=200
-# paddingOfftarget=300
-# minOfftarget=1000
-# maxOfftarget=50000
-# out=Twist-CE
-# targets=$here/Twist_ComprehensiveExome_targets_hg19.bed
-# ref=/opt/Tools/NGS_big_data/hg19.p13.plusMT.no_alt_analysis_set.fa
-
-
-#######
 
 
 here="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-file=$here/../refs/${genome}_ncbiRefSeq
+file=$here/data/${genome}_ncbiRefSeq
 # NCBI genes (without .tsv)
 # downloaded here: http://genome.ucsc.edu/cgi-bin/hgTables ncbiRefSeq "all fields from sleected table"
-file2=$here/../refs/${genome}_ctgPos2
+file2=$here/data/${genome}_ctgPos2
 # Contigs (without.tsv)
 # downloaded here: http://genome.ucsc.edu/cgi-bin/hgTables MappindandSequencing Map Contigs
 
@@ -135,7 +120,7 @@ bedtools merge -c 4 -o collapse -i $file.$out.exons.sort.bed > $file.$out.exons.
 bedtools sort -i $targets > $targets.$out.sort.bed
 bedtools merge -i $targets.$out.sort.bed > $targets.$out.merged.bed
 # script to separate exons covered by those which are not
-Rscript $here/../scripts/annotate-targets.R $file.$out.exons.sort.merge.bed $targets.$out.merged.bed $file.$out.exons.sort.merge.ontar.bed $file.$out.exons.sort.merge.offtar.bed
+Rscript $here/subscripts/annotate-targets.R $file.$out.exons.sort.merge.bed $targets.$out.merged.bed $file.$out.exons.sort.merge.ontar.bed $file.$out.exons.sort.merge.offtar.bed
 bedtools sort -i ${file}.$out.exons.sort.merge.offtar.bed > $file.$out.exons.sort.merge.offtar.sort.bed
 
 echo "Step 2: extend on-targets smaller than --minOntarget"
@@ -162,33 +147,33 @@ bedtools subtract -a $file2.$out.sort.bed -b $file.$out.exons.final.padded.bed >
 # split if bigger than maxOfftarget
 awk -F"\t" -v maxOfftarget=$maxOfftarget '{if($3-$2>maxOfftarget){n=int(($3-$2)/maxOfftarget)+2; pos[1]=$2; pos[n]=$3; for (i=2; i<n; i=i+1){pos[i]=$2+(i-1)*int(($3-$2)/(n-1))}; for (i=1; i<n; i=i+1){print $1 "\t" pos[i] "\t" pos[i+1] "\t" "Off-target_" $1 ":" pos[i] "-" pos[i+1]} } else {print $1 "\t" $2 "\t" $3 "\t" "Off-target_" $1 ":" $2 "-" $3} }' $file2.$out.sort.notar.bed > $file2.$out.sort.notar.split.bed
 bedtools sort -i $file2.$out.sort.notar.split.bed > $file2.$out.final.bed
-cat $file.$out.exons.final.bed $file2.$out.final.bed > $here/../refs/$out.hg19_both.bed
-bedtools sort -i $here/../refs/$out.hg19_both.bed > $here/../refs/$out.hg19_both.sort.bed
+cat $file.$out.exons.final.bed $file2.$out.final.bed > $here/data/$out.hg19_both.bed
+bedtools sort -i $here/data/$out.hg19_both.bed > $here/data/$out.hg19_both.sort.bed
 
 echo "Step 6: annotating non-coding exons"
 # looking in which off-targets non-coding exons are belonging
-bedtools intersect -a $here/../refs/$out.hg19_both.sort.bed -b $file.$out.exons.sort.merge.offtar.sort.bed -wb | cut -f4,8 > $file.$out.exons-non-coding.targets.tsv
-Rscript $here/../scripts/annotate-off-targets.R $here/../refs/$out.hg19_both.sort.bed $file.$out.exons-non-coding.targets.tsv $here/../refs/$out.hg19_both.sort.noncoding.bed
-grep "Off-target" $here/../refs/$out.hg19_both.sort.noncoding.bed > $here/../refs/$out.hg19_both.sort.noncoding.part1.bed
-grep -v "Off-target" $here/../refs/$out.hg19_both.sort.noncoding.bed > $here/../refs/$out.hg19_both.sort.noncoding.part3.bed
+bedtools intersect -a $here/data/$out.hg19_both.sort.bed -b $file.$out.exons.sort.merge.offtar.sort.bed -wb | cut -f4,8 > $file.$out.exons-non-coding.targets.tsv
+Rscript $here/subscripts/annotate-off-targets.R $here/data/$out.hg19_both.sort.bed $file.$out.exons-non-coding.targets.tsv $here/data/$out.hg19_both.sort.noncoding.bed
+grep "Off-target" $here/data/$out.hg19_both.sort.noncoding.bed > $here/data/$out.hg19_both.sort.noncoding.part1.bed
+grep -v "Off-target" $here/data/$out.hg19_both.sort.noncoding.bed > $here/data/$out.hg19_both.sort.noncoding.part3.bed
 
 echo "Step 7: removing off-targets smaller than --minOfftarget"
 # remove too small than minOfftarget
-awk -F"\t" -v minOfftarget=$minOfftarget '{if(($3-$2)>minOfftarget) print $0}' $here/../refs/$out.hg19_both.sort.noncoding.part1.bed > $here/../refs/$out.hg19_both.sort.noncoding.part1.filt.bed
+awk -F"\t" -v minOfftarget=$minOfftarget '{if(($3-$2)>minOfftarget) print $0}' $here/data/$out.hg19_both.sort.noncoding.part1.bed > $here/data/$out.hg19_both.sort.noncoding.part1.filt.bed
 
 echo "Step 8: writing output"
-cat $here/../refs/$out.hg19_both.sort.noncoding.part1.filt.bed $here/../refs/$out.hg19_both.sort.noncoding.part3.bed > $here/../refs/$out.hg19_both.sort.noncoding.partall.bed
-bedtools sort -i $here/../refs/$out.hg19_both.sort.noncoding.partall.bed > $here/../refs/$out.hg19_both.sort.noncoding.partall.sort.bed
-grep -v -P "^chrY" $here/../refs/$out.hg19_both.sort.noncoding.partall.sort.bed > $here/../refs/$out.temp
+cat $here/data/$out.hg19_both.sort.noncoding.part1.filt.bed $here/data/$out.hg19_both.sort.noncoding.part3.bed > $here/data/$out.hg19_both.sort.noncoding.partall.bed
+bedtools sort -i $here/data/$out.hg19_both.sort.noncoding.partall.bed > $here/data/$out.hg19_both.sort.noncoding.partall.sort.bed
+grep -v -P "^chrY" $here/data/$out.hg19_both.sort.noncoding.partall.sort.bed > $here/data/$out.temp
 
 echo "Step 9: annotating GC content"
-awk -F"\t" '{a=int(($2+$3)/2); c1=a-10000; c2=a+10000; if(c1<1){c1=1}; print $1 "\t" c1 "\t" c2 "\t" $4}' $here/../refs/$out.temp > $here/../refs/$out.temp2
-bedtools nuc -fi $ref -bed $here/../refs/$out.temp2 | tail -n+2 | cut -f6 > $here/../refs/$out.temp3
-paste -d "\t" $here/../refs/$out.temp $here/../refs/$out.temp3 | sort -V -k1,1 -k2,2 > $here/../refs/$out.bed
+awk -F"\t" '{a=int(($2+$3)/2); c1=a-10000; c2=a+10000; if(c1<1){c1=1}; print $1 "\t" c1 "\t" c2 "\t" $4}' $here/data/$out.temp > $here/data/$out.temp2
+bedtools nuc -fi $ref -bed $here/data/$out.temp2 | tail -n+2 | cut -f6 > $here/data/$out.temp3
+paste -d "\t" $here/data/$out.temp $here/data/$out.temp3 | sort -V -k1,1 -k2,2 > $here/data/$out.bed
 
 echo "Step 10: cleaning temporary files"
 # cleaning
-rm -f $file.$out.exons* $file2.$out.sort* $file.$out.exons.final.bed $file2.$out.final.bed $here/../refs/$out.hg19_both.bed $file2.$out.bed $here/../refs/$out.hg19_both.sort.noncoding.bed $here/../refs/$out.hg19_NCBI_genes.exons* $here/../refs/$out.hg19_both.sort.bed $here/../refs/*part*
-rm -f $targets.$out.* $here/../refs/$out.temp*
+rm -f $file.$out.exons* $file2.$out.sort* $file.$out.exons.final.bed $file2.$out.final.bed $here/data/$out.hg19_both.bed $file2.$out.bed $here/data/$out.hg19_both.sort.noncoding.bed $here/data/$out.hg19_NCBI_genes.exons* $here/data/$out.hg19_both.sort.bed $here/data/*part*
+rm -f $targets.$out.* $here/data/$out.temp*
 
 

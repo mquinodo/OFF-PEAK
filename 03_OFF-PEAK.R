@@ -72,7 +72,6 @@ if(databasefile=="NA"){
   stop("You need to include the database file with the --databasefile option. Exit.")
 }
 
-
 # loading libraries
 library(gplots) # for heatmap.2 function
 library(ExomeDepth) # for C_hmm function
@@ -1560,10 +1559,10 @@ print("Writing outputs and plots for all targets")
         temp=BOTHsave
         BOTHsave=BOTHsave[sel,]
         for (i in 1:length(sel)){
-          l1=max(as.numeric(allchr[which(allchr[,1]==BOTHsave[i,1] & as.numeric(allchr[,3])<=as.numeric(BOTHsave[i,2])),3]))
-          l2=min(as.numeric(allchr[which(allchr[,1]==BOTHsave[i,1] & as.numeric(allchr[,2])>=as.numeric(BOTHsave[i,3])),2]))
-          if(l1<0){l1=as.numeric(BOTHsave[i,2])}
-          if(l2>100000000000){l2=as.numeric(BOTHsave[i,3])}
+          m1=which(allchr[,1]==BOTHsave[i,1] & as.numeric(allchr[,3])<=as.numeric(BOTHsave[i,2]))
+          m2=which(allchr[,1]==BOTHsave[i,1] & as.numeric(allchr[,2])>=as.numeric(BOTHsave[i,3]))
+          if(length(m1)>0){l1=max(as.numeric(allchr[m1,3]))} else {l1=BOTHsave[i,2]}
+          if(length(m2)>0){l2=min(as.numeric(allchr[m2,2]))} else {l2=BOTHsave[i,3]}
           k1=exonschr[which(exonschr[,1]==BOTHsave[i,1] & (  (as.numeric(exonschr[,2])>=l1 & as.numeric(exonschr[,2])<=l2) | (as.numeric(exonschr[,3])>=l1 & as.numeric(exonschr[,3])<=l2) | (as.numeric(exonschr[,2])<=l1 & as.numeric(exonschr[,3])>=l2)  )),4]
           k2=strsplit(k1,"_")
           k3=unique(unlist(k2))
@@ -1573,8 +1572,6 @@ print("Writing outputs and plots for all targets")
           BOTHsave[i,36]=k5
           k6=paste(k1,collapse=";")
           BOTHsave[i,37]=k6
-          if(l1<0){l1=BOTHsave[i,2]}
-          if(l2>1000000000){l1=BOTHsave[i,3]}
           BOTHsave[i,34]=l1
           BOTHsave[i,35]=l2
 
@@ -1707,9 +1704,9 @@ print("Writing outputs and plots for all targets")
   } else {
       good=as.character(sampleinfo[,1])
   }
-  sel=which(abs(as.numeric(BOTHsave[,10]))>5 & as.numeric(BOTHsave[,24])!=2 & as.numeric(BOTHsave[,25])>2 & as.numeric(BOTHsave[,32])>2.5 & as.numeric(BOTHsave[,33])>3 & as.numeric(BOTHsave[,21])==0 & is.element(BOTHsave[,5],good))
+  sel=which(abs(as.numeric(BOTHsave[,10]))>5 & BOTHsave[,24]!="2" & as.numeric(BOTHsave[,25])>2 & as.numeric(BOTHsave[,32])>2.5 & as.numeric(BOTHsave[,33])>3 & as.numeric(BOTHsave[,21])==0 & is.element(BOTHsave[,5],good))
   write.table(BOTHsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-all.HQ.unique.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
-  sel=which(abs(as.numeric(BOTHsave[,10]))>5 & as.numeric(BOTHsave[,24])!=2 & as.numeric(BOTHsave[,25])>2 & as.numeric(BOTHsave[,32])>2.5 & as.numeric(BOTHsave[,33])>3 & is.element(BOTHsave[,5],good))
+  sel=which(abs(as.numeric(BOTHsave[,10]))>5 & BOTHsave[,24]!="2" & as.numeric(BOTHsave[,25])>2 & as.numeric(BOTHsave[,32])>2.5 & as.numeric(BOTHsave[,33])>3 & is.element(BOTHsave[,5],good))
   write.table(BOTHsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-all.HQ.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
   sel=which(BOTHsave[,23]!="normal" & is.element(BOTHsave[,5],good))
   write.table(BOTHsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-all.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
@@ -1794,10 +1791,10 @@ print("Writing outputs and plots for on-targets only")
         temp=TARsave
         TARsave=TARsave[sel,]
         for (i in 1:length(sel)){
-          l1=max(as.numeric(allchr[which(allchr[,1]==TARsave[i,1] & as.numeric(allchr[,3])<as.numeric(TARsave[i,2])),3]))
-          l2=min(as.numeric(allchr[which(allchr[,1]==TARsave[i,1] & as.numeric(allchr[,2])>as.numeric(TARsave[i,3])),2]))
-          if(l1<0){l1=as.numeric(TARsave[i,2])}
-          if(l2>100000000000){l2=as.numeric(TARsave[i,3])}
+          m1=which(allchr[,1]==TARsave[i,1] & as.numeric(allchr[,3])<=as.numeric(TARsave[i,2]))
+          m2=which(allchr[,1]==TARsave[i,1] & as.numeric(allchr[,2])>=as.numeric(TARsave[i,3]))
+          if(length(m1)>0){l1=max(as.numeric(allchr[m1,3]))} else {l1=TARsave[i,2]}
+          if(length(m2)>0){l2=min(as.numeric(allchr[m2,2]))} else {l2=TARsave[i,3]}
           k1=exonschr[which(exonschr[,1]==TARsave[i,1] & (  (as.numeric(exonschr[,2])>=l1 & as.numeric(exonschr[,2])<=l2) | (as.numeric(exonschr[,3])>=l1 & as.numeric(exonschr[,3])<=l2) | (as.numeric(exonschr[,2])<=l1 & as.numeric(exonschr[,3])>=l2)  )),4]
           k2=strsplit(k1,"_")
           k3=unique(unlist(k2))
@@ -1807,8 +1804,6 @@ print("Writing outputs and plots for on-targets only")
           TARsave[i,36]=k5
           k6=paste(k1,collapse=";")
           TARsave[i,37]=k6
-          if(l1<0){l1=TARsave[i,2]}
-          if(l2>1000000000){l1=TARsave[i,3]}
           TARsave[i,34]=l1
           TARsave[i,35]=l2
 
@@ -1954,9 +1949,9 @@ print("Writing outputs and plots for on-targets only")
   } else {
       good=as.character(sampleinfo[,1])
   }
-  sel=which(abs(as.numeric(TARsave[,10]))>5 & as.numeric(TARsave[,24])!=2 & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & as.numeric(TARsave[,21])==0 & is.element(TARsave[,5],good))
+  sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & as.numeric(TARsave[,21])==0 & is.element(TARsave[,5],good))
   write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.unique.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
-  sel=which(abs(as.numeric(TARsave[,10]))>5 & as.numeric(TARsave[,24])!=2 & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & is.element(TARsave[,5],good))
+  sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & is.element(TARsave[,5],good))
   write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
   sel=which(TARsave[,23]!="normal" & is.element(TARsave[,5],good))
   write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-all.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)

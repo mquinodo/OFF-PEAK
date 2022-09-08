@@ -41,7 +41,7 @@ Option | Default | Value | Description
 --- | --- | --- | ---
 --minOntarget | 100 | 1 - Inf | Minimal size of on-targets. Smaller on-target regions will be extended on each side to reach this value.
 --maxOntarget | 300 | > minOntarget | Maximal size of on-targets. Larger on-target regions will be splitted into regions of equal size.
---minOfftarget | 1000 | 1 - Inf | Minimal size of off-targets. Smaller on-target regions will be discarded.
+--minOfftarget | 1 | 1 - Inf | Minimal size of off-targets. Smaller on-target regions will be discarded.
 --maxOfftarget | 50000 | > minOfftarget | Maximal size of off-targets. Larger on-target regions will be splitted into regions of equal size.
 --paddingOfftarget | 300 | 0 - Inf | Padding around on-target regions to avoid targeted reads to be counted in off-target regions.
 
@@ -93,6 +93,7 @@ Option | Default | Value | Description
 --nbFake | 500 | 10 - 10000 | Number of fake CNVs used for optimization of PC removal.
 --stopPC | 0.0001 | 0 - 0.1 | Stopping criteria for optimization of PC removal.
 --minZ | 4 | 2 - 10 | Minimal absolute Z-score for single target CNV processing.
+--minOfftarget | 1000 | 1 - Inf | Minimal size of off-targets without exons.
 --chromosome-plots | - | - | If present, coverage plots for each chromosome will be done.
 --genome-plots | - | - | If present, genome-wide coverage plots will be done.
 

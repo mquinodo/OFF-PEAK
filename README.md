@@ -133,7 +133,6 @@ Option | Default | Value | Description
 The output files are grouped in 6 general folders and one folder per sample.
 
 ### 01_general_stats with:
-
 File name | Explanation
 --- | ---
 Pairwise-correlations-all.tsv | Text file with pairwise correlation between samples
@@ -143,37 +142,53 @@ Maximal-correlation-per-sample.pdf | PDF file representing maximal correlation p
 log_parameters.tsv | Text file with the log of parameters used
 
 ### 02_BED-files
-CNVs-all-IGV.bed
-CNVs-targets-only-IGV.bed
-CNVs-all-AnnotSV.bed
-CNVs-targets-only-AnnotSV.bed
+File name | Explanation
+--- | ---
+CNVs-all-IGV.bed | BED file that be loaded on IGV for visualization of all CNVs
+CNVs-targets-only-IGV.bed | BED file that be loaded on IGV for visualization of on-target CNVs
+CNVs-all-AnnotSV.bed | BED file that be used for AnnotSV annotation of all CNVs
+CNVs-targets-only-AnnotSV.bed | BED file that be used for AnnotSV annotation of on-target CNVs
 
 ### 03_Samples-info
-Samples_quality_info.tsv
-Samples_low-quality.tsv
+File name | Explanation
+--- | ---
+Samples_quality_info.tsv | Quality information about samples
+Samples_low-quality.tsv | Samples with low quality
 
 ### 04_CNVs-results
-CNVs-all.tsv
-CNVs-targets-only.tsv
+File name | Explanation
+--- | ---
+CNVs-all.tsv | All CNVs detected
+CNVs-targets-only.tsv | On-target CNVs
 The folder also includes filtered CNVs:
-HQ: only high quality CNVs (PQ>2, CQ>2.5, QUAL>3)
-unique: no other samples with overlapping CNVs
-HQ-sample: only samples of high quality
+Type | Explanation
+--- | ---
+HQ | only high quality CNVs (PQ>2, CQ>2.5, QUAL>3)
+unique | no other samples with overlapping CNVs
+HQ-sample | only samples of high quality
 
 ### 05_RData-files
-data-ID.RData
-data-plot-ID.RData
-data-targets-ID.RData
+File name | Explanation
+--- | ---
+data-ID.RData | Data for all targets
+data-plot-ID.RData | Data used for plotting CNVs
+data-targets-ID.RData | Data for on-targets only
 
 ### 06_PC-plots
-PC-removal-ID.pdf
-Variance-explained-ID.pdf
+File name | Explanation
+--- | ---
+PC-removal-ID.pdf | PDF representing AUCs on fake CNVs depending on PC removal
+Variance-explained-ID.pdf | PDF representing the variance explained by PCs
 
 ### Individual folder
-ID-merged.tsv
-ID-merged_targets-only.tsv
+File name | Explanation
+--- | ---
+ID-merged.tsv | All CNVs found in the sample
+ID-merged_targets-only.tsv | On-target CNVs found in the sample
 #### Subfolders:
-plots_on-targets_off-targets
-plots_on-targets-only
-plots_genome
-plots_chromosomes
+Sufolder name | Explanation
+--- | ---
+plots_on-targets_off-targets | Folder with graphical representation of best CNVs
+plots_on-targets-only | Folder with graphical representation of best on-target CNVs
+plots_genome | Folder with genome-wide representation of coverage
+plots_chromosomes | Folder with chromosome representation of coverage

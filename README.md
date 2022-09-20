@@ -133,11 +133,11 @@ Option | Default | Value | Description
 The output files are grouped in 6 general folders and one folder per sample.
 
 ### 01_general_stats with:
-Pairwise-correlations-all.tsv |
-Heatmap-correlations-all.pdf |
-Maximal-correlation-per-sample.tsv |
-Maximal-correlation-per-sample.pdf |
-log_parameters.tsv |
+Pairwise-correlations-all.tsv | Text file with pairwise correlation between samples
+Heatmap-correlations-all.pdf | PDF file with heatmap of the pairwise correlations
+Maximal-correlation-per-sample.tsv | Text file with maximal correlation per sample
+Maximal-correlation-per-sample.pdf | PDF file representing maximal correlation per sample
+log_parameters.tsv | Text file with the log of parameters used
 
 ### 02_BED-files
 CNVs-all-IGV.bed

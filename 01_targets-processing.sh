@@ -75,8 +75,8 @@ if [ -z "${maxOntarget}" ]; then
     echo " -> No use of --maxOntarget option, value set as default: 300"
 fi
 if [ -z "${minOfftarget}" ]; then
-    minOfftarget=1000
-    echo " -> No use of --minOfftarget option, value set as default: 1000"
+    minOfftarget=1
+    echo " -> No use of --minOfftarget option, value set as default: 1"
 fi
 if [ -z "${maxOfftarget}" ]; then
     maxOfftarget=50000
@@ -86,7 +86,6 @@ if [ -z "${paddingOfftarget}" ]; then
     paddingOfftarget=300
     echo " -> No use of --paddingOfftarget option, value set as default: 300"
 fi
-
 
 
 here="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -147,13 +146,18 @@ bedtools subtract -a $file2.$out.sort.bed -b $file.$out.exons.final.padded.bed >
 # split if bigger than maxOfftarget
 awk -F"\t" -v maxOfftarget=$maxOfftarget '{if($3-$2>maxOfftarget){n=int(($3-$2)/maxOfftarget)+2; pos[1]=$2; pos[n]=$3; for (i=2; i<n; i=i+1){pos[i]=$2+(i-1)*int(($3-$2)/(n-1))}; for (i=1; i<n; i=i+1){print $1 "\t" pos[i] "\t" pos[i+1] "\t" "Off-target_" $1 ":" pos[i] "-" pos[i+1]} } else {print $1 "\t" $2 "\t" $3 "\t" "Off-target_" $1 ":" $2 "-" $3} }' $file2.$out.sort.notar.bed > $file2.$out.sort.notar.split.bed
 bedtools sort -i $file2.$out.sort.notar.split.bed > $file2.$out.final.bed
+#merging on- and off-targets
 cat $file.$out.exons.final.bed $file2.$out.final.bed > $here/data/$out.hg19_both.bed
 bedtools sort -i $here/data/$out.hg19_both.bed > $here/data/$out.hg19_both.sort.bed
+# adding padding intervals as off-targets
+bedtools subtract -a $file2.$out.sort.bed -b $here/data/$out.hg19_both.sort.bed | awk -F"\t" '{print $1 "\t" $2 "\t" $3 "\t" "Off-target_" $1 ":" $2 "-" $3}' > $here/data/$out.padded.bed
+cat $here/data/$out.hg19_both.sort.bed $here/data/$out.padded.bed > $here/data/$out.hg19_both2.bed
+bedtools sort -i $here/data/$out.hg19_both2.bed > $here/data/$out.hg19_both2.sort.bed
 
 echo "Step 6: annotating non-coding exons"
 # looking in which off-targets non-coding exons are belonging
-bedtools intersect -a $here/data/$out.hg19_both.sort.bed -b $file.$out.exons.sort.merge.offtar.sort.bed -wb | cut -f4,8 > $file.$out.exons-non-coding.targets.tsv
-Rscript $here/subscripts/annotate-off-targets.R $here/data/$out.hg19_both.sort.bed $file.$out.exons-non-coding.targets.tsv $here/data/$out.hg19_both.sort.noncoding.bed
+bedtools intersect -a $here/data/$out.hg19_both2.sort.bed -b $file.$out.exons.sort.merge.offtar.sort.bed -wb | cut -f4,8 > $file.$out.exons-non-coding.targets.tsv
+Rscript $here/subscripts/annotate-off-targets.R $here/data/$out.hg19_both2.sort.bed $file.$out.exons-non-coding.targets.tsv $here/data/$out.hg19_both.sort.noncoding.bed
 grep "Off-target" $here/data/$out.hg19_both.sort.noncoding.bed > $here/data/$out.hg19_both.sort.noncoding.part1.bed
 grep -v "Off-target" $here/data/$out.hg19_both.sort.noncoding.bed > $here/data/$out.hg19_both.sort.noncoding.part3.bed
 
@@ -173,7 +177,7 @@ paste -d "\t" $here/data/$out.temp $here/data/$out.temp3 | sort -V -k1,1 -k2,2 >
 
 echo "Step 10: cleaning temporary files"
 # cleaning
-rm -f $file.$out.exons* $file2.$out.sort* $file.$out.exons.final.bed $file2.$out.final.bed $here/data/$out.hg19_both.bed $file2.$out.bed $here/data/$out.hg19_both.sort.noncoding.bed $here/data/$out.hg19_NCBI_genes.exons* $here/data/$out.hg19_both.sort.bed $here/data/*part*
+rm -f $file.$out.exons* $file2.$out.sort* $file.$out.exons.final.bed $file2.$out.final.bed $here/data/$out.hg19_both.bed $file2.$out.bed $here/data/$out.hg19_both.sort.noncoding.bed $here/data/$out.hg19_NCBI_genes.exons* $here/data/$out.hg19_both*.sort.bed $here/data/*part* $here/data/$out.padded.bed $here/data/$out.hg19_both2.bed
 rm -f $targets.$out.* $here/data/$out.temp*
 
 

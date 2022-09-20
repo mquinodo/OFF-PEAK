@@ -130,4 +130,47 @@ Option | Default | Value | Description
 
 ## Output files
 
-Blabla
+The output files are grouped in 6 general folders and one folder per sample.
+
+01_general_stats with:
+Pairwise-correlations-all.tsv
+Heatmap-correlations-all.pdf
+Maximal-correlation-per-sample.tsv
+Maximal-correlation-per-sample.pdf
+log_parameters.tsv
+
+02_BED-files
+CNVs-all-IGV.bed
+CNVs-targets-only-IGV.bed
+CNVs-all-AnnotSV.bed
+CNVs-targets-only-AnnotSV.bed
+
+03_Samples-info
+Samples_quality_info.tsv
+Samples_low-quality.tsv
+
+04_CNVs-results
+CNVs-all.tsv
+CNVs-targets-only.tsv
+The folder also includes filtered CNVs:
+HQ: only high quality CNVs (PQ>2, CQ>2.5, QUAL>3)
+unique: no other samples with overlapping CNVs
+HQ-sample: only samples of high quality
+
+05_RData-files
+data-ID.RData
+data-plot-ID.RData
+data-targets-ID.RData
+
+06_PC-plots
+PC-removal-ID.pdf
+Variance-explained-ID.pdf
+
+individual
+ID-merged.tsv
+ID-merged_targets-only.tsv
+subfolders:
+plots_on-targets_off-targets
+plots_on-targets-only
+plots_genome
+plots_chromosomes

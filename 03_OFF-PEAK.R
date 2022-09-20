@@ -35,6 +35,9 @@ option_list = list(
   make_option(c("--minZ"), type="numeric", default="4", 
               help="minimum abs(Z-score) for single-exon CNVs", metavar="numeric"),
 
+  make_option(c("--minOfftarget"), type="numeric", default="1000", 
+              help="minimum size for off-targets with no exons", metavar="numeric"),
+
   make_option(c("--databasefile"), type="character", default="NA", 
               help="RData file for CNV annotation", metavar="character"),
 
@@ -58,9 +61,10 @@ downsample=as.numeric(args[7])
 nbFake=as.numeric(args[8])
 stopPC=as.numeric(args[9])
 minZ=as.numeric(args[10])
-databasefile=as.character(args[11])
-chromoPlots=as.logical(args[12])
-genomePlots=as.logical(args[13])
+minOfftarget=as.numeric(args[11])
+databasefile=as.character(args[12])
+chromoPlots=as.logical(args[13])
+genomePlots=as.logical(args[14])
 
 if(data=="NA"){
   stop("You need to include the files containing the readcount per target with the --data option. Exit.")
@@ -71,6 +75,25 @@ if(folder=="NA"){
 if(databasefile=="NA"){
   stop("You need to include the database file with the --databasefile option. Exit.")
 }
+
+
+
+# folder="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2020-test"
+# data="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2020-small/ALL.target.tsv"
+# mincor=0.9
+# minsignal=2500
+# maxvar=-0.2
+# leaveoneout=1
+# downsample=20000
+# nbFake=500
+# stopPC=0.0001
+# minZ=3
+# minOfftarget=1000
+# databasefile="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/refs/data-hg19.RData"
+# genomePlots=FALSE
+# chromoPlots=FALSE
+
+
 
 # loading libraries
 library(gplots) # for heatmap.2 function
@@ -83,6 +106,10 @@ load(databasefile)
 
 # reading input files with readcounts
 dataALL=read.table(file=data,header=T)
+
+# removing off-targets smaller than minOfftarget and without exons inside
+taken=which(grepl("NM",dataALL[,4])==T | as.numeric(dataALL[,3])-as.numeric(dataALL[,2])>minOfftarget)
+dataALL=dataALL[taken,]
 
 # separating GC content from other data
 GC=dataALL[,5]
@@ -98,8 +125,8 @@ dir.create(paste(folder,"/05_RData-files",sep=""), showWarnings = FALSE)
 dir.create(paste(folder,"/06_PC-plots",sep=""), showWarnings = FALSE)
 
 # saving parameters used
-n=c("folder","data","mincor","minsignal","maxvar","leaveoneout","downsample","nbFake","stopPC","minZ","databasefile")
-out=cbind(n,args[1:11])
+n=c("folder","data","mincor","minsignal","maxvar","leaveoneout","downsample","nbFake","stopPC","minZ","minOfftarget","databasefile")
+out=cbind(n,args[1:12])
 write.table(out,file=paste(folder,"/01_general-stats/log_parameters.tsv",sep=""),quote=F,sep="\t",row.names=F,col.names=F)
 
 # important functions
@@ -108,11 +135,12 @@ write.table(out,file=paste(folder,"/01_general-stats/log_parameters.tsv",sep="")
 plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
 
   load(data)
+  all=allPLOT
 
   if(offtar==F){all=all[which(grepl("Off-target",all[,4])==F),]}
 
-  pdf(file=pdf,width=10,height=12)
-
+  pdf(file=pdf,width=20,height=12)
+  par(mfrow=c(1,2))
 
   {
     # taking regions of interest
@@ -125,12 +153,12 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
 
     pos=unique(d[,c(2,3,4)])
     pos=cbind(pos,pos,pos)
-    pos=pos[,1:8]
     pos[,4]=0
     pos[,5]=0
     pos[,6]=0
     pos[,7]=0
     pos[,8]=0
+    pos[,9]=0
     pos=as.data.frame(pos)
     for (i in c(1,2,4:8)){
       pos[,i]=as.numeric(pos[,i])
@@ -142,19 +170,26 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
       pos[i,6]=as.numeric(d[which(as.numeric(d[,2])==pos[i,1]),13]) # SD
       pos[i,7]=min(pos[i,5]-pos[i,6],pos[i,4])/pos[i,5]
       pos[i,8]=max(pos[i,5]+pos[i,6],pos[i,4])/pos[i,5]
+      pos[i,9]=d[which(as.numeric(d[,2])==pos[i,1]),15]
     }
 
-    low=1-2*(pos[,6]/pos[,5])
-    high=1+2*(pos[,6]/pos[,5])
-    ma=max(high[is.finite(high)],pos[is.finite(pos[,8]),8])*1.05
-    mi=min((-0.05),low[is.finite(low)]-0.05,pos[is.finite(pos[,7]),7]-0.05)
-    plot((pos[,4]/pos[,5])+1000,xlim=c(0-length(pos[,4])*0.24,length(pos[,4])*1.02),xaxs="i",yaxs="i",ylim=c(mi-(ma-mi)*0.5,ma),main=paste("Sample: ",ID,"  /  Position: ",chr,":",begin,"-",end,sep=""),xlab="",ylab="",yaxt='n',xaxt='n',cex.main=1.6)
-    
+    ma=max(1.5*1.05,(pos[,4]/pos[,5])*1.5)
+    ma=min(ma,5)
+    mi=(-0.05)
+    plot((pos[,4]/pos[,5])+1000,xlim=c(0-length(pos[,4])*0.24,length(pos[,4])*1.02),xaxs="i",yaxs="i",ylim=c(mi-(ma-mi)*0.5,ma),main=paste("Sample: ",ID,"  /  Position: ",chr,":",begin,"-",end,"\nAll targets",sep=""),xlab="",ylab="",yaxt='n',xaxt='n',cex.main=1.6)
     
     # red box
     d1=which(pos[,1]>=begin & pos[,2]<=end)
-    polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-10,-10,1000,1000),col=rgb(1,0.9,1),border=NA)
+    #polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-10,-10,1000,1000),col=rgb(1,0.9,1),border=NA)
+    rect(min(d1)-0.45,-10,max(d1)+0.45,100,col=rgb(1,0.9,1),border=NA)
     abline(h=mi-(ma-mi)*0.5)
+
+    # boxes for dicarded
+    for (i in 1:dim(pos)[1]){
+      if(pos[i,9]=="No"){
+        rect(i-0.5,-1000,i+0.5,1000,col="lemonchiffon",border=NA)
+      }
+    }
     
     # Y axis
     ya=seq(0,10,0.5)
@@ -163,7 +198,20 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
 
     # sd grey shape
     l=1:dim(pos)[1]
-    polygon(c(l,rev(l)),c(low,rev(high)),col="lightgray",border=NA)
+    low=1-2*(pos[,6]/pos[,5])
+    high=1+2*(pos[,6]/pos[,5])
+    polygon(c(l,rev(l)),c(low,rev(high)),col="gray85",border=NA)
+    #polygon(c(-1000,1000,-1000,1000),c(-10,-10,mi,mi),col="white",border=NA)
+    rect(-1000,-10,1000,mi,col="white",border=NA)
+    d1=which(pos[,1]>=begin & pos[,2]<=end)
+    #polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-1000,-1000,mi,mi),col=rgb(1,0.9,1),border=NA)
+    rect(min(d1)-0.45,-1000,max(d1)+0.45,mi,col=rgb(1,0.9,1),border=NA)
+    for (i in 1:dim(pos)[1]){
+      if(pos[i,9]=="No"){
+        rect(i-0.5,-1000,i+0.5,mi,col="lemonchiffon",border=NA)
+      }
+    }
+
     
     abline(h=1)
     
@@ -173,11 +221,17 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
     
     lines(pos[,4]/pos[,5], lty = 2)
     abline(h=mi)
-    tar=pos[which(grepl("Off-target",pos[,3])==F),]
-    anti=pos[which(grepl("Off-target",pos[,3])==T),]
-    points(which(grepl("Off-target",pos[,3])==F),tar[,4]/tar[,5],pch=15,col="green")
-    points(which(grepl("Off-target",pos[,3])==T),anti[,4]/anti[,5],pch=19,col="blue")
-    legend(0-length(pos[,4])*0.23,ma/2,yjust=0.5,cex=0.8,legend=c("Targets","Off-targets","Selected sample","2*SD all samples","Selected region"),col=c("green","blue","black","darkgrey",rgb(1,0.9,1),"white"),pch=c(15,19,NA,15,15,NA),pt.cex=c(1,1,NA,2,2,NA),lty=c(NA,NA,2,NA,NA,NA),bg="white",y.intersp=1.5)
+    tar=pos[which(grepl("Off-target",pos[,3])==F & pos[,9]=="Yes"),]
+    anti=pos[which(grepl("Off-target",pos[,3])==T & pos[,9]=="Yes"),]
+    tarD=pos[which(grepl("Off-target",pos[,3])==F & pos[,9]=="No"),]
+    antiD=pos[which(grepl("Off-target",pos[,3])==T & pos[,9]=="No"),]
+
+    points(which(grepl("Off-target",pos[,3])==F & pos[,9]=="Yes"),tar[,4]/tar[,5],pch=15,col="green")
+    points(which(grepl("Off-target",pos[,3])==T & pos[,9]=="Yes"),anti[,4]/anti[,5],pch=17,col="blue")
+    points(which(grepl("Off-target",pos[,3])==F & pos[,9]=="No"),tarD[,4]/tarD[,5],pch=15,col="red")
+    points(which(grepl("Off-target",pos[,3])==T & pos[,9]=="No"),antiD[,4]/antiD[,5],pch=17,col="orange")
+
+    legend(0-length(pos[,4])*0.23,ma/2,yjust=0.5,cex=0.75,legend=c("On-targets","Off-targets","Low qual. on-targets","Low qual. off-targets","Selected sample","2*SD controls","CNV region","Low quality"),col=c("green","blue","red","orange","black","darkgrey",rgb(1,0.9,1),"lemonchiffon"),pch=c(15,17,15,17,NA,15,15,15),pt.cex=c(1,1,1,1,NA,2,2,2),lty=c(NA,NA,NA,NA,2,NA,NA,NA),bg="white",y.intersp=1.5)
     
     pos2=pos[which(grepl("NM",pos[,3])==T),]
     
@@ -233,6 +287,7 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
         }
 
         listgenes=unique(genes[which(genes[,4]!=""),4])
+        if(UseCano==TRUE){listgenes=listgenes[which(grepl("\\*",listgenes)==T)]}
         
         low=mi-(ma-mi)*0.3
         high=mi
@@ -317,6 +372,9 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
             if(pos3[i,5]=="Yes"){
               h=(high-low)/hexon1
               polygon(c(posi-b3,posi+b3,posi+b3,posi-b3,posi-b3),c(center-h,center-h,center+h,center+h,center-h),col=j,border=NA)
+              if(pos3[i,7]!="Yes"){
+                polygon(c(posi-b3,posi+b3,posi+b3,posi-b3,posi-b3),c(center-h,center-h,center+h,center+h,center-h),col=j,border=NA)
+              }
               if(i>1){if(pos3[i,7]=="Yes" & pos3[i-1,7]=="Yes" & pos3[i,6]==pos3[i-1,6]){
                 polygon(c(posi-b3-0.5,posi+b3,posi+b3,posi-b3-0.5,posi-b3-0.5),c(center-h,center-h,center+h,center+h,center-h),col=j,border=NA)
               }}
@@ -331,7 +389,333 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
             }
             if(pos3[i,5]=="No"){
               h=(high-low)/hexon2
+              if(pos3[i,7]!="Yes"){
+                polygon(c(posi-b3,posi+b3,posi+b3,posi-b3,posi-b3),c(center-h,center-h,center+h,center+h,center-h),col=j,border=NA)
+              }
+              if(i>1){if(pos3[i,7]=="Yes" & pos3[i-1,7]=="Yes" & pos3[i,6]==pos3[i-1,6]){
+                polygon(c(posi-b3-0.5,posi+b3,posi+b3,posi-b3-0.5,posi-b3-0.5),c(center-h,center-h,center+h,center+h,center-h),col=j,border=NA)
+              }}
+              if(pos3[i,7]!="Yes"){
+                text(posi,center,pos3[i,6],cex=policeexon,adj=c(0.5,0.5),col="lightgray")
+              } else {
+                n=which(pos3[,6]==pos3[i,6])
+                n1=which(pos[,1]==pos3[which(pos3[,6]==pos3[i,6])[1],1])
+                n2=which(pos[,1]==pos3[which(pos3[,6]==pos3[i,6])[length(which(pos3[,6]==pos3[i,6]))],1])
+                text((n2+n1)/2,center,pos3[i,6],cex=policeexon,adj=c(0.5,0.5),col="lightgray")
+              }
+            }
+            
+            posiold=posi
+          }
+          
+          posi=which(is.element(pos[,1],pos3[,1]))
+          if(grepl("\\*",listgenes[j])==T){
+              text(0-(length(pos[,4])*0.24)/2,posg[j],listgenes[j],cex=policeiso,adj=c(0.5,0.5),col=j,font=2)
+            } else {
+              text(0-(length(pos[,4])*0.24)/2,posg[j],listgenes[j],cex=policeiso,adj=c(0.5,0.5),col=j)
+            }
+          abline(h=ma)
+          abline(h=mi-(ma-mi)*0.3)
+        }
+      }
+    }
+
+    s1=which(ClinVar[,1]==chr & as.numeric(ClinVar[,2])>=min(as.numeric(d[,2])) & as.numeric(ClinVar[,3])<=max(as.numeric(d[,3])) & grepl("deletion",ClinVar[,4])==T)
+    s2=which(ClinVar[,1]==chr & as.numeric(ClinVar[,2])>=min(as.numeric(d[,2])) & as.numeric(ClinVar[,3])<=max(as.numeric(d[,3])) & grepl("duplication",ClinVar[,4])==T)
+    s3=which(gnomAD[,1]==chr & as.numeric(gnomAD[,2])>=min(as.numeric(d[,2])) & as.numeric(gnomAD[,3])<=max(as.numeric(d[,3])) & grepl("DEL",gnomAD[,4])==T)
+    s3=c(s3,which(gnomAD[,1]==chr & as.numeric(gnomAD[,3])>=min(as.numeric(d[,2])) & as.numeric(gnomAD[,3])<=max(as.numeric(d[,3])) & grepl("DEL",gnomAD[,4])==T))
+    s3=c(s3,which(gnomAD[,1]==chr & as.numeric(gnomAD[,2])>=min(as.numeric(d[,2])) & as.numeric(gnomAD[,2])<=max(as.numeric(d[,3])) & grepl("DEL",gnomAD[,4])==T))
+    s3=c(s3,which(gnomAD[,1]==chr & as.numeric(gnomAD[,2])<=min(as.numeric(d[,2])) & as.numeric(gnomAD[,3])>=max(as.numeric(d[,3])) & grepl("DEL",gnomAD[,4])==T))
+    s4=which(gnomAD[,1]==chr & as.numeric(gnomAD[,2])>=min(as.numeric(d[,2])) & as.numeric(gnomAD[,3])<=max(as.numeric(d[,3])) & grepl("DUP",gnomAD[,4])==T)
+    s4=c(s4,which(gnomAD[,1]==chr & as.numeric(gnomAD[,3])>=min(as.numeric(d[,2])) & as.numeric(gnomAD[,3])<=max(as.numeric(d[,3])) & grepl("DUP",gnomAD[,4])==T))
+    s4=c(s4,which(gnomAD[,1]==chr & as.numeric(gnomAD[,2])>=min(as.numeric(d[,2])) & as.numeric(gnomAD[,2])<=max(as.numeric(d[,3])) & grepl("DUP",gnomAD[,4])==T))
+    s4=c(s4,which(gnomAD[,1]==chr & as.numeric(gnomAD[,2])<=min(as.numeric(d[,2])) & as.numeric(gnomAD[,3])>=max(as.numeric(d[,3])) & grepl("DUP",gnomAD[,4])==T))
+
+    s1=unique(s1)
+    s2=unique(s2)
+    s3=unique(s3)
+    s4=unique(s4)
+
+    s=c(s1,s2,s3,s4)
+    s=cbind(s,s,s,s,s,s)
+    s[,1]=c(ClinVar[s1,2],ClinVar[s2,2],gnomAD[s3,2],gnomAD[s4,2])
+    s[,2]=c(ClinVar[s1,3],ClinVar[s2,3],gnomAD[s3,3],gnomAD[s4,3])
+    s[,3]=c(rep(1,length(s1)),rep(2,length(s2)),rep(3,length(s3)),rep(4,length(s4)))
+
+
+    if(length(s)>0){
+      for (i in 1:dim(s)[1]){
+        s[i,4]=suppressWarnings(min(which(as.numeric(d[,2])>as.numeric(s[i,1]) & as.numeric(d[,3])<as.numeric(s[i,2]))))
+        s[i,5]=suppressWarnings(max(which(as.numeric(d[,2])>as.numeric(s[i,1]) & as.numeric(d[,3])<as.numeric(s[i,2]))))
+      }
+      if(length(which(s[,4]=="Inf"))>0){s=s[-which(s[,4]=="Inf"),]}
+    }
+
+    l0=2
+
+    if(length(s)>6){
+      if(dim(s)[1]>10){l0=1}
+      yc=seq(from=mi-(ma-mi)*0.5,to=mi-(ma-mi)*0.3,by=(mi-(ma-mi)*0.3-(mi-(ma-mi)*0.5))/(dim(s)[1]+3))
+      for (i in 1:dim(s)[1]){
+        lines(c(s[i,4]-0.5,s[i,5]+0.5),c(yc[i+2],yc[i+2]),col=s[i,3],lwd=l0)
+      }
+    }
+    if(length(s)==6){
+      yc=seq(from=mi-(ma-mi)*0.5,to=mi-(ma-mi)*0.3,by=(mi-(ma-mi)*0.3-(mi-(ma-mi)*0.5))/(2))
+      i=1
+      lines(c(s[4]-0.5,s[5]+0.5),c(yc[2],yc[2]),col=s[3],lwd=2)
+    }
+
+    legend(0-length(pos[,4])*0.23,mi-(ma-mi)*0.4,yjust=0.5,cex=0.8,legend=c("ClinVar patho. del.","ClinVar patho. dup.","gnomAD >1% del.","gnomAD >1% dup."),col=c(1,2,3,4),pch=c(NA,NA,NA,NA),lwd=c(2,2,2,2),bg="white",y.intersp=1.5)
+
+    
+  }
+
+  {
+    all=all[which(all[,15]=="Yes"),]
+
+    # taking regions of interest
+    sel=which(all[,1]==chr & as.numeric(all[,2])>=begin & as.numeric(all[,3])<=end)
+    sel=max(sel[1]-side,0):min(dim(all)[1],(sel[length(sel)]+side))
+
+    d=all[sel,]
+
+    if(length(which(d[,12]==0))>0) {d=d[-which(d[,12]==0),]}
+
+    pos=unique(d[,c(2,3,4)])
+    pos=cbind(pos,pos,pos)
+    pos[,4]=0
+    pos[,5]=0
+    pos[,6]=0
+    pos[,7]=0
+    pos[,8]=0
+    pos[,9]=0
+    pos=as.data.frame(pos)
+    for (i in c(1,2,4:8)){
+      pos[,i]=as.numeric(pos[,i])
+    }
+    for(i in 1:dim(pos)[1]){
+      # corrected counts
+      pos[i,4]=as.numeric(d[which(as.numeric(d[,2])==pos[i,1]),11]) # ID
+      pos[i,5]=as.numeric(d[which(as.numeric(d[,2])==pos[i,1]),12]) # mean
+      pos[i,6]=as.numeric(d[which(as.numeric(d[,2])==pos[i,1]),13]) # SD
+      pos[i,7]=min(pos[i,5]-pos[i,6],pos[i,4])/pos[i,5]
+      pos[i,8]=max(pos[i,5]+pos[i,6],pos[i,4])/pos[i,5]
+      pos[i,9]=d[which(as.numeric(d[,2])==pos[i,1]),15]
+    }
+
+    ma=max(1.5*1.05,(pos[,4]/pos[,5])*1.5)
+    mi=(-0.05)
+    plot((pos[,4]/pos[,5])+1000,xlim=c(0-length(pos[,4])*0.24,length(pos[,4])*1.02),xaxs="i",yaxs="i",ylim=c(mi-(ma-mi)*0.5,ma),main=paste("Sample: ",ID,"  /  Position: ",chr,":",begin,"-",end,"\nHigh quality targets",sep=""),xlab="",ylab="",yaxt='n',xaxt='n',cex.main=1.6)
+    
+    # red box
+    d1=which(pos[,1]>=begin & pos[,2]<=end)
+    #polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-10,-10,1000,1000),col=rgb(1,0.9,1),border=NA)
+    rect(min(d1)-0.45,-10,max(d1)+0.45,1000,col=rgb(1,0.9,1),border=NA)
+    abline(h=mi-(ma-mi)*0.5)
+
+    # # boxes for dicarded
+    # for (i in 1:dim(pos)[1]){
+    #   if(pos[i,9]=="No"){
+    #     polygon(c(i-0.5,i+0.5,i-0.5,i+0.5),c(-10,-10,1000,1000),col="lightgreen",border=NA)
+    #   }
+    # }
+    
+    # Y axis
+    ya=seq(0,10,0.5)
+    ya=ya[which(ya>mi & ya<ma)]
+    axis(2,at=ya)
+
+    # sd grey shape
+    l=1:dim(pos)[1]
+    low=1-2*(pos[,6]/pos[,5])
+    high=1+2*(pos[,6]/pos[,5])
+    polygon(c(l,rev(l)),c(low,rev(high)),col="gray85",border=NA)
+    #polygon(c(-1000,1000,-1000,1000),c(-10,-10,mi,mi),col="white",border=NA)
+    rect(-1000,-10,1000,mi,col="white",border=NA)
+    d1=which(pos[,1]>=begin & pos[,2]<=end)
+    #polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-1000,-1000,mi,mi),col=rgb(1,0.9,1),border=NA)
+    rect(min(d1)-0.45,-1000,max(d1)+0.45,mi,col=rgb(1,0.9,1),border=NA)
+    
+    abline(h=1)
+    
+    for (i in 1:length(ya)){
+      if(ya[i]!=1){abline(h=ya[i],lty=2,col=1)}
+    }
+    
+    lines(pos[,4]/pos[,5], lty = 2)
+    abline(h=mi)
+    tar=pos[which(grepl("Off-target",pos[,3])==F & pos[,9]=="Yes"),]
+    anti=pos[which(grepl("Off-target",pos[,3])==T & pos[,9]=="Yes"),]
+    tarD=pos[which(grepl("Off-target",pos[,3])==F & pos[,9]=="No"),]
+    antiD=pos[which(grepl("Off-target",pos[,3])==T & pos[,9]=="No"),]
+
+    points(which(grepl("Off-target",pos[,3])==F & pos[,9]=="Yes"),tar[,4]/tar[,5],pch=15,col="green")
+    points(which(grepl("Off-target",pos[,3])==T & pos[,9]=="Yes"),anti[,4]/anti[,5],pch=17,col="blue")
+    points(which(grepl("Off-target",pos[,3])==F & pos[,9]=="No"),tarD[,4]/tarD[,5],pch=15,col="red")
+    points(which(grepl("Off-target",pos[,3])==T & pos[,9]=="No"),antiD[,4]/antiD[,5],pch=17,col="orange")
+
+    legend(0-length(pos[,4])*0.23,ma/2,yjust=0.5,cex=0.75,legend=c("On-targets","Off-targets","Selected sample","2*SD controls","CNV region"),col=c("green","blue","black","darkgrey",rgb(1,0.9,1),"white"),pch=c(15,17,NA,15,15,NA),pt.cex=c(1,1,NA,2,2,NA),lty=c(NA,NA,2,NA,NA,NA),bg="white",y.intersp=1.5)
+    
+    pos2=pos[which(grepl("NM",pos[,3])==T),]
+    
+    if(dim(pos2)[1]>0){
+      
+      mtext('Observed / Expected read ratio', side=2, line=2.5,at=mi+(ma-mi)/2,cex=1.3)
+      mtext('Transcripts', side=2, line=2.5,at=mi-(ma-mi)*0.15,cex=1.3)
+      mtext('and exons', side=2, line=1,at=mi-(ma-mi)*0.15,cex=1.3)
+      mtext("* indicates canonical isoforms", side=2, line=0.25,at=mi-(ma-mi)*0.15,cex=0.5)
+      mtext('ClinVar and', side=2, line=2.5,at=mi-(ma-mi)*0.4,cex=1.3)
+      mtext('gnomAD CNVs', side=2, line=1,at=mi-(ma-mi)*0.4,cex=1.3)
+
+      pos2[,8]="Yes"
+      temp=pos2
+      temp=temp[-(1:dim(pos2)[1]),]
+      for(i in 1:dim(pos2)[1]){
+        n=strsplit(pos2[i,3],",")[[1]]
+        if(grepl("Off-target",pos2[i,3])){pos2[i,8]="No"}
+        for (j in 1:length(n)){
+          new=pos2[i,]
+          new[3]=n[j]
+          new[6]=strsplit(n[j],"_")[[1]][1]
+          temp=rbind(temp,new)
+        }
+      }
+      pos2=temp
+      pos2=pos2[which(grepl("NM",pos2[,3])==T),]
+
+      pos2[,7]="No"
+      for (i in 1:dim(pos2)[1]){
+        if(grepl("part",pos2[i,3])==T){pos2[i,7]="Yes"}
+      }
+      for (i in 1:dim(pos2)[1]){
+        if(pos2[i,7]=="Yes"){
+          pos2[which(pos2[,1]==pos2[i,1] & pos2[,2]==pos2[i,2]),7]="Yes"
+        }
+      }
+
+      for (i in 1:dim(pos2)[1]){
+        pos2[i,6]=strsplit(strsplit(pos2[i,3],"exon")[[1]][2],"-")[[1]][1]
+      }
+
+      genes=pos2
+
+      if(dim(pos2)[1]>0){
+        pos2[,5]=pos2[,8]
+        for(i in 1:dim(pos2)[1]){
+          genes[i,4]=paste(strsplit(pos2[,3],"_")[[i]][1:3],collapse="_")
+          iso=paste(strsplit(pos2[,3],"_")[[i]][2:3],collapse="_")
+          if(is.element(iso,as.vector(cano)[[1]])){
+            genes[i,4]=paste(genes[i,4],"*",collapse="",sep="")
+          }
+        }
+
+        listgenes=unique(genes[which(genes[,4]!=""),4])
+        if(UseCano==TRUE){listgenes=listgenes[which(grepl("\\*",listgenes)==T)]}
+        
+        low=mi-(ma-mi)*0.3
+        high=mi
+        
+        posg=seq(low,high,length.out=length(listgenes)+2)
+        posg=posg[2:(length(posg)-1)]
+
+
+
+        niso=length(listgenes)
+        nreg=length(sel)
+
+        if(niso<4){
+          policeexon=0.6
+          policeiso=0.6
+          hexon1=20
+          hexon2=25
+        }
+
+        if(niso>=4 & niso<7){
+          policeexon=0.5
+          policeiso=0.6
+          hexon1=30
+          hexon2=45
+        }
+
+        if(niso>=7 & niso<20){
+          policeexon=0.4
+          policeiso=0.6
+          hexon1=60
+          hexon2=75
+        }
+
+        if(niso>=20 & niso<30){
+          policeexon=0.2
+          policeiso=0.4
+          hexon1=80
+          hexon2=95
+        }
+
+        if(niso>=30 & niso<40){
+          policeexon=0.2
+          policeiso=0.3
+          hexon1=100
+          hexon2=115
+        }
+
+        if(niso>=40){
+          policeexon=0.2
+          policeiso=0.2
+          hexon1=120
+          hexon2=135
+        }
+
+        if(nreg>150){
+          policeexon=0.1
+        }
+
+        if(nreg>70){
+          policeexon=0.2
+        }
+
+        
+        for(j in 1:length(listgenes)){
+          pos3=pos2[which(genes[,4]==listgenes[j]),]
+          pos3=pos3[!duplicated(pos3[,c('Begin','End')]),]
+
+          for(i in 1:dim(pos3)[1]){
+            posi=which(pos[,1]==pos3[i,1])
+            center=posg[j]
+            if(i>1){
+              lines(c(posi,posiold),c(center,center),col=j)
+            }
+            posiold=posi
+          }
+          
+          for(i in 1:dim(pos3)[1]){
+            posi=which(pos[,1]==pos3[i,1])
+            center=posg[j]
+            b3=0.3
+            t=(high-low)/15
+            if(pos3[i,5]=="Yes"){
+              h=(high-low)/hexon1
               polygon(c(posi-b3,posi+b3,posi+b3,posi-b3,posi-b3),c(center-h,center-h,center+h,center+h,center-h),col=j,border=NA)
+              if(pos3[i,7]!="Yes"){
+                polygon(c(posi-b3,posi+b3,posi+b3,posi-b3,posi-b3),c(center-h,center-h,center+h,center+h,center-h),col=j,border=NA)
+              }
+              if(i>1){if(pos3[i,7]=="Yes" & pos3[i-1,7]=="Yes" & pos3[i,6]==pos3[i-1,6]){
+                polygon(c(posi-b3-0.5,posi+b3,posi+b3,posi-b3-0.5,posi-b3-0.5),c(center-h,center-h,center+h,center+h,center-h),col=j,border=NA)
+              }}
+              if(pos3[i,7]!="Yes"){
+                text(posi,center,pos3[i,6],cex=policeexon,adj=c(0.5,0.5),col="lightgray")
+              } else {
+                n=which(pos3[,6]==pos3[i,6])
+                n1=which(pos[,1]==pos3[which(pos3[,6]==pos3[i,6])[1],1])
+                n2=which(pos[,1]==pos3[which(pos3[,6]==pos3[i,6])[length(which(pos3[,6]==pos3[i,6]))],1])
+                text((n2+n1)/2,center,pos3[i,6],cex=policeexon,adj=c(0.5,0.5),col="lightgray")
+              }
+            }
+            if(pos3[i,5]=="No"){
+              h=(high-low)/hexon2
+              if(pos3[i,7]!="Yes"){
+                polygon(c(posi-b3,posi+b3,posi+b3,posi-b3,posi-b3),c(center-h,center-h,center+h,center+h,center-h),col=j,border=NA)
+              }
               if(i>1){if(pos3[i,7]=="Yes" & pos3[i-1,7]=="Yes" & pos3[i,6]==pos3[i-1,6]){
                 polygon(c(posi-b3-0.5,posi+b3,posi+b3,posi-b3-0.5,posi-b3-0.5),c(center-h,center-h,center+h,center+h,center-h),col=j,border=NA)
               }}
@@ -608,7 +992,7 @@ returnAUC <- function(all,fakeCNV) {
 
 ######################################################
 
-# decalration of variables for output
+# declaration of variables for output
 output <- array(0, dim=c(0,20))
 colnames(output)=c("Chr","begin","end","name","ind","raw-counts","raw-average","raw-sd","raw-ratio","cor-z-score","cor-counts","cor-average","cor-sd","cor-ratio","cor-p-val","rank","mean-fake","nb-Z5","nb-samples","nb-SV")
 BOTHsave=output
@@ -628,7 +1012,7 @@ for(pat in colnames(dataALL)[5:num]){
   if(genomePlots){dir.create(paste(folder,"/",pat,"/plots_genome",sep=""), showWarnings = FALSE)}
   if(chromoPlots){dir.create(paste(folder,"/",pat,"/plots_chromosomes",sep=""), showWarnings = FALSE)}
   
-  print(paste("  Step 1: selectiong samples with correlation > ",mincor,sep=""))
+  print(paste("  Step 1: selecting samples with correlation > ",mincor,sep=""))
 
   {
 
@@ -660,6 +1044,7 @@ for(pat in colnames(dataALL)[5:num]){
     meanSEL=apply(dataSEL[,5:numSEL],1,mean)
     sdSEL=apply(dataSEL[,5:numSEL],1,sd)
     taken=which(meanSEL>0 & sdSEL!=0)
+
     dataCOR=dataSEL[taken,]
     numCOR=dim(dataCOR)[2]
 
@@ -713,8 +1098,10 @@ for(pat in colnames(dataALL)[5:num]){
     # filtering for signal and noise limits
     meanCOR=apply(dataCOR[,5:numCOR],1,mean)
     sdCOR=apply(dataCOR[,5:numCOR],1,sd)
-    taken=which(meanCOR>minsignal & log10(sdCOR/meanCOR)<maxvar)
-    dataCOR=dataCOR[taken,]
+    dataPLOT=dataCOR
+    taken2=which(meanCOR>minsignal & log10(sdCOR/meanCOR)<maxvar)
+    takenPLOT=dataCOR[taken2,4]
+    dataCOR=dataCOR[taken2,]
 
     print(paste("    Intervals selected: ",dim(dataCOR)[1]," out of ",dim(dataSEL)[1],sep=""))
 
@@ -963,6 +1350,47 @@ for(pat in colnames(dataALL)[5:num]){
     } else {
         HQ=as.character(sampleinfo[,1])
     }
+
+    dataPLOT2=dataPLOT[,5:numCOR]
+    dataPLOT2t=t(dataPLOT2)
+    dataPLOT2tCOR=dataPLOT2t
+
+    # doing the PCA
+    if(leaveoneout==1){
+      dataPLOT3=dataPLOT2tCOR[-which(rownames(dataPLOT2tCOR)==pat),]
+      sdPLOT3=apply(dataPLOT3,2,sd)
+      dataPLOT3=dataPLOT3[,which(sdPLOT3>0)]
+      dataPLOT2tCOR=dataPLOT2tCOR[,which(sdPLOT3>0)]
+      dataPLOT2t=dataPLOT2t[,which(sdPLOT3>0)]
+      dataPLOT=dataPLOT[which(sdPLOT3>0),]
+      sdPLOT2 <- apply(dataPLOT2t, 2, sd) # calculate standard deviation
+      meanPLOT2 <- apply(dataPLOT2t, 2, mean) # calculate mean
+    } else {
+      dataPLOT3=dataPLOT2tCOR
+    }
+    PCAmodel <- prcomp(dataPLOT3, center = TRUE,scale. = TRUE)
+
+    # rem=PCs to remove
+    allPLOT <- PCAcorrection(remPC,PCAmodel,dataPLOT2tCOR,sdPLOT2,meanPLOT2,pat,dataPLOT,numCOR)
+    allPLOT=as.data.frame(allPLOT)
+
+    # putting at zero negative corrected counts and ratios
+    if(length(which(as.numeric(allPLOT[,11])<0))>0){
+      allPLOT[which(as.numeric(allPLOT[,11])<0),11]=0
+    }
+    if(length(which(as.numeric(allPLOT[,14])<0))>0){
+      allPLOT[which(as.numeric(allPLOT[,14])<0),14]=0
+    }
+    select=which(allPLOT[,6]==0)
+    if(length(select)>0){
+      allPLOT[select,11]=0
+      allPLOT[select,10]=round((as.numeric(allPLOT[select,11])-as.numeric(allPLOT[select,12]))/as.numeric(allPLOT[select,13]),digits=2)
+    }
+
+    allPLOT[,15]="No"
+    allPLOT[which(is.element(allPLOT[,4],takenPLOT)==T),15]="Yes"
+
+    save(allPLOT,file=paste(folder,"/05_RData-files/data-plot-",pat,".RData",sep=""))
 
   }
 
@@ -1526,10 +1954,11 @@ for(pat in colnames(dataALL)[5:num]){
 
 
 print("Writing outputs and plots for all targets")
+
 {
 
-  BOTHsave=cbind(BOTHsave,BOTHsave[,1:10],BOTHsave[,21],BOTHsave[,17:21])
-  colnames(BOTHsave)[21:37]=c("Nb_overlapping_samples","Genes","Type","Ploidy","PQ","gnomAD-CNV_1%","ClinVar-patho_included","ncRNAs","gnomAD-CNV_ALL","ClinVar-patho_overlap","Exons","CQ","QUAL","Begin-min","End-max","Genes-possible","Exons-possible")
+  BOTHsave=cbind(BOTHsave,BOTHsave[,1:10],BOTHsave[,21],BOTHsave[,17:21],BOTHsave[,17:19])
+  colnames(BOTHsave)[21:40]=c("Nb_overlapping_samples","Genes","Type","Ploidy","PQ","gnomAD-CNV_1%","ClinVar-patho_included","ncRNAs","gnomAD-CNV_ALL","ClinVar-patho_overlap","Exons","CQ","QUAL","Begin-min","End-max","Genes-possible","Exons-possible","Nb-exon-before-chr","Nb-exon-after-chr","RefSeq_Functional_Element")
 
   # annotating nb of samples with overlapping (80%) CNVs with HQ-sample
   for (i in 1:dim(BOTHsave)[1]){
@@ -1593,6 +2022,7 @@ print("Writing outputs and plots for all targets")
 
   # annotation of ploidy and quality
   for (i in 1:dim(BOTHsave)[1]){
+
     c0=(as.numeric(BOTHsave[i,11])-0*as.numeric(BOTHsave[i,12]))/as.numeric(BOTHsave[i,13])
     c1=(as.numeric(BOTHsave[i,11])-0.5*as.numeric(BOTHsave[i,12]))/as.numeric(BOTHsave[i,13])
     c2=(as.numeric(BOTHsave[i,11])-1*as.numeric(BOTHsave[i,12]))/as.numeric(BOTHsave[i,13])
@@ -1606,6 +2036,7 @@ print("Writing outputs and plots for all targets")
     BOTHsave[i,23]=type[which.min(c6)]
     BOTHsave[i,24]=ploidy[which.min(c6)]
     BOTHsave[i,25]=round(abs(c2)-min(c6),digits=1)/as.numeric(BOTHsave[i,16])
+
   }
   BOTHsave=BOTHsave[which(BOTHsave[,24]!=2),]
 
@@ -1616,7 +2047,6 @@ print("Writing outputs and plots for all targets")
     sampleinfo[which(sampleinfo[,1]==sample),3]=n
   }
   write.table(sampleinfo,file=paste(folder,"/03_Samples-info/Samples_quality_info.tsv",sep=""),quote=F,sep="\t",row.names=F)
-
 
   # annotation of frequent gnomAD-SV-1%
   for (i in 1:dim(BOTHsave)[1]){
@@ -1677,6 +2107,27 @@ print("Writing outputs and plots for all targets")
       }
   }
 
+  # annotation of number of targets from chromosome ends
+  ex=unique(exons[,1:3])
+  for (i in 1:dim(BOTHsave)[1]){
+    BOTHsave[i,38]=length(which(ex[,1]==BOTHsave[i,1] & as.numeric(ex[,2])<as.numeric(BOTHsave[i,2])))
+    BOTHsave[i,39]=length(which(ex[,1]==BOTHsave[i,1] & as.numeric(ex[,3])>as.numeric(BOTHsave[i,3])))
+  }
+
+  # RefSeq Functional Element Features
+  for (i in 1:dim(BOTHsave)[1]){
+    j1=which(FEfeats[,1]==BOTHsave[i,1] & as.numeric(FEfeats[,2])>as.numeric(BOTHsave[i,2]) & as.numeric(FEfeats[,3])<as.numeric(BOTHsave[i,3]))
+    j2=which(FEfeats[,1]==BOTHsave[i,1] & as.numeric(FEfeats[,2])<as.numeric(BOTHsave[i,2]) & as.numeric(FEfeats[,3])>as.numeric(BOTHsave[i,2]))
+    j3=which(FEfeats[,1]==BOTHsave[i,1] & as.numeric(FEfeats[,2])<as.numeric(BOTHsave[i,3]) & as.numeric(FEfeats[,3])>as.numeric(BOTHsave[i,3]))
+    j4=which(FEfeats[,1]==BOTHsave[i,1] & as.numeric(FEfeats[,2])<as.numeric(BOTHsave[i,2]) & as.numeric(FEfeats[,3])>as.numeric(BOTHsave[i,3]))
+    j5=c(j1,j2,j3,j4)
+    if(length(j5)>0){
+        BOTHsave[i,40]=paste(FEfeats[j5,4],collapse=",")
+      } else {
+        BOTHsave[i,40]="-"
+      }
+  }
+
   # QUAL
   BOTHsave[,32]=round((1/as.numeric(BOTHsave[,32])),digits=2)
   BOTHsave[which(BOTHsave[,32]=="Inf"),32]=10000
@@ -1687,14 +2138,13 @@ print("Writing outputs and plots for all targets")
   BOTHsave=BOTHsave[sort(abs(as.numeric(BOTHsave[,10])),index.return=T,decreasing=T)$ix,]
 
   # writing outputs
-  cols=c(5,1:3,34:35,23,24,16,4,22,31,36,28,21,26,29,11:14,10,25,32,33,20,18,27,30)
+  cols=c(5,1:3,34:35,23,24,16,4,22,31,36,28,40,21,26,29,11:14,10,25,32,33,20,18,27,30,38,39)
   sel=which(BOTHsave[,23]!="normal")
   write.table(BOTHsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-all.tsv",sep=""),quote=F,sep="\t",row.names=F)
-  sel=which(abs(as.numeric(BOTHsave[,10]))>5 & as.numeric(BOTHsave[,24])!=2 & as.numeric(BOTHsave[,25])>2 & as.numeric(BOTHsave[,32])>2.5 & as.numeric(BOTHsave[,33])>3)
+  sel=which(abs(as.numeric(BOTHsave[,10]))>5 & BOTHsave[,24]!="2" & as.numeric(BOTHsave[,25])>2 & as.numeric(BOTHsave[,32])>2.5 & as.numeric(BOTHsave[,33])>3)
   write.table(BOTHsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-all.HQ.tsv",sep=""),quote=F,sep="\t",row.names=F)
-  sel=which(abs(as.numeric(BOTHsave[,10]))>5 & as.numeric(BOTHsave[,24])!=2 & as.numeric(BOTHsave[,25])>2 & as.numeric(BOTHsave[,32])>2.5 & as.numeric(BOTHsave[,33])>3 & as.numeric(BOTHsave[,21])==0)
+  sel=which(abs(as.numeric(BOTHsave[,10]))>5 & BOTHsave[,24]!="2" & as.numeric(BOTHsave[,25])>2 & as.numeric(BOTHsave[,32])>2.5 & as.numeric(BOTHsave[,33])>3 & as.numeric(BOTHsave[,21])==0)
   write.table(BOTHsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-all.HQ.unique.tsv",sep=""),quote=F,sep="\t",row.names=F)
-
 
   varav=mean(as.numeric(sampleinfo[,6]))
   varsd=sd(as.numeric(sampleinfo[,6]))
@@ -1742,7 +2192,7 @@ print("Writing outputs and plots for all targets")
             chr=allBOTH[i,1]
             begin=as.numeric(allBOTH[i,2])
             end=as.numeric(allBOTH[i,3])
-            data=paste(folder,"/05_RData-files/data-",pat,".RData",sep="")
+            data=paste(folder,"/05_RData-files/data-plot-",pat,".RData",sep="")
             pdf=paste(folder,"/",pat,"/plots_on-targets_off-targets/",pat,"-",chr,"-",begin,"-",end,".pdf",sep="")
             side=20
             z=allBOTH[i,10]
@@ -1756,11 +2206,14 @@ print("Writing outputs and plots for all targets")
 
 }
 
+
+
 print("Writing outputs and plots for on-targets only")
+
 {
 
-  TARsave=cbind(TARsave,TARsave[,1:10],TARsave[,21],TARsave[,17:21])
-  colnames(TARsave)[21:37]=c("Nb_overlapping_samples","Genes","Type","Ploidy","Ploidy-qual","gnomAD-CNV_1%","ClinVar-patho_included","ncRNAs","gnomAD-CNV_ALL","ClinVar-patho_overlap","Exons","CNV-qual","QUAL","Begin-min","End-max","Genes-possible","Exons-possible")
+  TARsave=cbind(TARsave,TARsave[,1:10],TARsave[,21],TARsave[,17:21],TARsave[,17:19])
+  colnames(TARsave)[21:40]=c("Nb_overlapping_samples","Genes","Type","Ploidy","Ploidy-qual","gnomAD-CNV_1%","ClinVar-patho_included","ncRNAs","gnomAD-CNV_ALL","ClinVar-patho_overlap","Exons","CNV-qual","QUAL","Begin-min","End-max","Genes-possible","Exons-possible","Nb-exon-before-chr","Nb-exon-after-chr","RefSeq_Functional_Element")
 
   # annotating nb of samples with overlapping (80%) CNVs with HQ-sample
   for (i in 1:dim(TARsave)[1]){
@@ -1823,25 +2276,9 @@ print("Writing outputs and plots for on-targets only")
     }
   }
 
-  # annotating genes and exons
-  for (i in 1:dim(TARsave)[1]){
-    l1=max(as.numeric(all[which(all[,1]==TARsave[i,1] & as.numeric(all[,3])<as.numeric(TARsave[i,2])),3]))
-    l2=min(as.numeric(all[which(all[,1]==TARsave[i,1] & as.numeric(all[,2])>as.numeric(TARsave[i,3])),2]))
-    k1=exons[which(exons[,1]==TARsave[i,1] & (  (as.numeric(exons[,2])>l1 & as.numeric(exons[,2])<l2) | (as.numeric(exons[,3])>l1 & as.numeric(exons[,3])<l2) | (as.numeric(exons[,2])<l1 & as.numeric(exons[,3])>l2)  )),4]
-    k2=strsplit(k1,"_")
-    k3=unique(unlist(k2))
-    k4=k3[-which(grepl("exon",k3)==T | grepl("chr",k3)==T | grepl("\\.",k3)==T | grepl("Off-target",k3)==T | k3=="NM")]
-    k5=paste(k4,collapse=",")
-    k5[which(k5=="")]="-"
-    TARsave[i,22]=k5
-    k6=paste(k1,collapse=";")
-    TARsave[i,31]=k6
-    TARsave[i,34]=l1
-    TARsave[i,35]=l2
-  }
-
   # annotation of ploidy and quality
   for (i in 1:dim(TARsave)[1]){
+
     c0=(as.numeric(TARsave[i,11])-0*as.numeric(TARsave[i,12]))/as.numeric(TARsave[i,13])
     c1=(as.numeric(TARsave[i,11])-0.5*as.numeric(TARsave[i,12]))/as.numeric(TARsave[i,13])
     c2=(as.numeric(TARsave[i,11])-1*as.numeric(TARsave[i,12]))/as.numeric(TARsave[i,13])
@@ -1855,6 +2292,7 @@ print("Writing outputs and plots for on-targets only")
     TARsave[i,23]=type[which.min(c6)]
     TARsave[i,24]=ploidy[which.min(c6)]
     TARsave[i,25]=round(abs(c2)-min(c6),digits=1)/as.numeric(TARsave[i,16])
+
   }
   TARsave=TARsave[which(TARsave[,24]!=2),]
 
@@ -1923,22 +2361,43 @@ print("Writing outputs and plots for on-targets only")
       }
   }
 
+  # annotation of number of targets from chromosome ends
+  ex=unique(exons[,1:3])
+  for (i in 1:dim(TARsave)[1]){
+    TARsave[i,38]=length(which(ex[,1]==TARsave[i,1] & as.numeric(ex[,2])<as.numeric(TARsave[i,2])))
+    TARsave[i,39]=length(which(ex[,1]==TARsave[i,1] & as.numeric(ex[,3])>as.numeric(TARsave[i,3])))
+  }
+
+  # RefSeq Functional Element Features
+  for (i in 1:dim(TARsave)[1]){
+    j1=which(FEfeats[,1]==TARsave[i,1] & as.numeric(FEfeats[,2])>as.numeric(TARsave[i,2]) & as.numeric(FEfeats[,3])<as.numeric(TARsave[i,3]))
+    j2=which(FEfeats[,1]==TARsave[i,1] & as.numeric(FEfeats[,2])<as.numeric(TARsave[i,2]) & as.numeric(FEfeats[,3])>as.numeric(TARsave[i,2]))
+    j3=which(FEfeats[,1]==TARsave[i,1] & as.numeric(FEfeats[,2])<as.numeric(TARsave[i,3]) & as.numeric(FEfeats[,3])>as.numeric(TARsave[i,3]))
+    j4=which(FEfeats[,1]==TARsave[i,1] & as.numeric(FEfeats[,2])<as.numeric(TARsave[i,2]) & as.numeric(FEfeats[,3])>as.numeric(TARsave[i,3]))
+    j5=c(j1,j2,j3,j4)
+    if(length(j5)>0){
+        TARsave[i,40]=paste(FEfeats[j5,4],collapse=",")
+      } else {
+        TARsave[i,40]="-"
+      }
+  }
+
   # QUAL
   TARsave[,32]=round((1/as.numeric(TARsave[,32])),digits=2)
   TARsave[which(TARsave[,32]=="Inf"),32]=10000
   TARsave[,33]=round(abs(as.numeric(TARsave[,10]))/as.numeric(TARsave[,16]),digits=2)
   TARsave[,25]=round(as.numeric(TARsave[,25]),digits=2)
-  
+
   # sorting by QUAL
   TARsave=TARsave[sort(abs(as.numeric(TARsave[,10])),index.return=T,decreasing=T)$ix,]
 
   # writing outputs
-  cols=c(5,1:3,34:35,23,24,16,4,22,31,36,28,21,26,29,11:14,10,25,32,33,20,18,27,30)
+  cols=c(5,1:3,34:35,23,24,16,4,22,31,36,28,40,21,26,29,11:14,10,25,32,33,20,18,27,30,38:39)
   sel=which(TARsave[,23]!="normal")
   write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.tsv",sep=""),quote=F,sep="\t",row.names=F)
-  sel=which(abs(as.numeric(TARsave[,10]))>5 & as.numeric(TARsave[,24])!=2 & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3)
+  sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3)
   write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.tsv",sep=""),quote=F,sep="\t",row.names=F)
-  sel=which(abs(as.numeric(TARsave[,10]))>5 & as.numeric(TARsave[,24])!=2 & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & as.numeric(TARsave[,21])==0)
+  sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & as.numeric(TARsave[,21])==0)
   write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.unique.tsv",sep=""),quote=F,sep="\t",row.names=F)
 
   varav=mean(as.numeric(sampleinfo[,6]))
@@ -1954,7 +2413,7 @@ print("Writing outputs and plots for on-targets only")
   sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & is.element(TARsave[,5],good))
   write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
   sel=which(TARsave[,23]!="normal" & is.element(TARsave[,5],good))
-  write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-all.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
+  write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
 
   # BED file for IGV
   bed=TARsave[,c(1:3,5,23)]
@@ -1986,7 +2445,7 @@ print("Writing outputs and plots for on-targets only")
             chr=allBOTH[i,1]
             begin=as.numeric(allBOTH[i,2])
             end=as.numeric(allBOTH[i,3])
-            data=paste(folder,"/05_RData-files/data-targets-",pat,".RData",sep="")
+            data=paste(folder,"/05_RData-files/data-plot-",pat,".RData",sep="")
             pdf=paste(folder,"/",pat,"/plots_on-targets-only/",pat,"-",chr,"-",begin,"-",end,"_on-targets.pdf",sep="")
             side=20
             z=allBOTH[i,10]

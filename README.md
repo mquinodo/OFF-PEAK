@@ -133,6 +133,8 @@ Option | Default | Value | Description
 The output files are grouped in 6 general folders and one folder per sample.
 
 ### 01_general_stats with:
+
+File name | Explanation
 Pairwise-correlations-all.tsv | Text file with pairwise correlation between samples
 Heatmap-correlations-all.pdf | PDF file with heatmap of the pairwise correlations
 Maximal-correlation-per-sample.tsv | Text file with maximal correlation per sample

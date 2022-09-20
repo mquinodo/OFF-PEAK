@@ -132,7 +132,7 @@ Option | Default | Value | Description
 
 The output files are grouped in 6 general folders and one folder per sample.
 
-### 01_general_stats with:
+#### 01_general_stats with:
 File name | Explanation
 --- | ---
 Pairwise-correlations-all.tsv | Text file with pairwise correlation between samples
@@ -141,7 +141,7 @@ Maximal-correlation-per-sample.tsv | Text file with maximal correlation per samp
 Maximal-correlation-per-sample.pdf | PDF file representing maximal correlation per sample
 log_parameters.tsv | Text file with the log of parameters used
 
-### 02_BED-files
+#### 02_BED-files
 File name | Explanation
 --- | ---
 CNVs-all-IGV.bed | BED file that be loaded on IGV for visualization of all CNVs
@@ -149,13 +149,13 @@ CNVs-targets-only-IGV.bed | BED file that be loaded on IGV for visualization of 
 CNVs-all-AnnotSV.bed | BED file that be used for AnnotSV annotation of all CNVs
 CNVs-targets-only-AnnotSV.bed | BED file that be used for AnnotSV annotation of on-target CNVs
 
-### 03_Samples-info
+#### 03_Samples-info
 File name | Explanation
 --- | ---
 Samples_quality_info.tsv | Quality information about samples
 Samples_low-quality.tsv | Samples with low quality
 
-### 04_CNVs-results
+#### 04_CNVs-results
 File name | Explanation
 --- | ---
 CNVs-all.tsv | All CNVs detected
@@ -167,28 +167,65 @@ HQ | only high quality CNVs (PQ>2, CQ>2.5, QUAL>3)
 unique | no other samples with overlapping CNVs
 HQ-sample | only samples of high quality
 
-### 05_RData-files
+#### 05_RData-files
 File name | Explanation
 --- | ---
 data-ID.RData | Data for all targets
 data-plot-ID.RData | Data used for plotting CNVs
 data-targets-ID.RData | Data for on-targets only
 
-### 06_PC-plots
+#### 06_PC-plots
 File name | Explanation
 --- | ---
 PC-removal-ID.pdf | PDF representing AUCs on fake CNVs depending on PC removal
 Variance-explained-ID.pdf | PDF representing the variance explained by PCs
 
-### Individual folder
+#### Individual folder
 File name | Explanation
 --- | ---
 ID-merged.tsv | All CNVs found in the sample
 ID-merged_targets-only.tsv | On-target CNVs found in the sample
-#### Subfolders:
+##### Subfolders:
 Sufolder name | Explanation
 --- | ---
 plots_on-targets_off-targets | Folder with graphical representation of best CNVs
 plots_on-targets-only | Folder with graphical representation of best on-target CNVs
 plots_genome | Folder with genome-wide representation of coverage
 plots_chromosomes | Folder with chromosome representation of coverage
+
+#### Explanation of fields in CNV text files:
+Field | Explanation
+--- | ---
+ID | ID of the sample
+Chromosome | Chromosome
+Begin | Coordinate of the beginning of the CNV
+End | Coordinate of the end of the CNV
+Begin-min | Minimal begin position of detected CNV (including low quality targets)
+End-max | Maximal end position of detected CNV (including low quality targets)
+Type | Deletion or duplication
+Ploidy | Most likely ploidy based on Z-scores
+Nb_targets | Number of targets in the CNV
+Targets | ID of targets in the CNV
+Genes | Genes affected by the CNV
+Exons | Exons affected by the CNV
+Genes-possible | Genes affected by minimal to maximal positions (including low quality targets)
+ncRNAs | non-coding RNAs affected by the CNV
+RefSeq_Functional_Element | Function elements affected by the CNV
+Nb_overlapping_samples | Number of samples with an overlapping CNV
+gnomAD-CNV_1% | Frequent included CNVs from gnomAD with AF>1%
+gnomAD-CNV_ALL | All included CNVs from gnomAD
+Counts | Total coverage in the targets included in the CNV
+Average_counts | Average total coverage for the controls
+SD_counts | Standard deviation of the total coverage for the controls
+Ratio | Ratio between sample coverage and control coverage
+Z-score_cor | Corrected Z-score for the coverage
+PQ | Ploidy quality
+CQ | CNV quality (based on "shape")
+QUAL | Overall quality
+Rank_sample | Rank of the CNV in the sample based on absolute Z-score
+Nb_CNV_HQ | Number of high quality CNVs in the sample
+ClinVar-patho_included | All included CNVs from ClinVar
+ClinVar-patho_overlap | All overlaping CNVs from ClinVar
+Nb-exon-before-chr | Number of exons between the CNV and the beginning of the chromosome
+Nb-exon-after-chr | Number of exons between the CNV and the end of the chromosome
+

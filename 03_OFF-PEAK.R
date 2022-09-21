@@ -1514,7 +1514,7 @@ for(pat in colnames(dataALL)[5:num]){
         pdf(file=paste(folder,"/",pat,"/plots_chromosomes/",pat,"-",chr,"_by-target.pdf",sep=""),width=16,height=16)
         par(mfrow=c(2,1))
         loc=length(which(dataALL[,1]==chr))
-        plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,loc),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab=chr,main=paste(chr,"plot by coordinate (raw) for",pat,sep=" "),xaxs = "i",yaxs = "i")
+        plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,loc),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab=chr,main=paste(chr,"plot by target (raw) for",pat,sep=" "),xaxs = "i",yaxs = "i")
         lines(1:loc,runmean(raw[which(dataALL[,1]==chr)],n1),col=4)
         lines(1:loc,runmean(raw[which(dataALL[,1]==chr)],n2),col=2)
         lines(1:loc,runmean(raw[which(dataALL[,1]==chr)],n3),col=3)
@@ -1525,7 +1525,7 @@ for(pat in colnames(dataALL)[5:num]){
         legend("topright", legend = c("Average over 10","Average over 200","Average over 5000") ,pch = c(NA,NA,NA), lty = c(1,1,1), lwd = c(2,2,1),col = c(4,2,3),bg='white',y.intersp=1.2,cex=1.2,ncol=1)
         
         loc=length(which(all[,1]==chr))
-        plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,loc),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab=chr,main=paste(chr,"plot by coordinate (filtered and corrected) for",pat,sep=" "),xaxs = "i",yaxs = "i")
+        plot(-10,-10,type='l',ylim=c(0,2),xlim=c(0,loc),col=4,xaxt='n',ylab="Observed / Expected read ratio",xlab=chr,main=paste(chr,"plot by target (filtered and corrected) for",pat,sep=" "),xaxs = "i",yaxs = "i")
         lines(1:loc,runmean(all[which(all[,1]==chr),14],n1),col=4)
         lines(1:loc,runmean(all[which(all[,1]==chr),14],n2),col=2)
         lines(1:loc,runmean(all[which(all[,1]==chr),14],n3),col=3)

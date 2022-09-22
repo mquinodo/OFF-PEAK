@@ -45,6 +45,18 @@ out=as.character(args[7])
 databasefile=as.character(args[8])
 UseCano=as.character(args[9])
 
+
+
+# ID="CHlaus0003"
+# chr="chr19"
+# begin=54610369
+# end=54657577
+# side=20
+# data="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2020-t/05_RData-files/data-plot-CHlaus0003.RData"
+# out="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2020-t/CHlaus0003-2"
+# databasefile="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/refs/data-hg19.RData"
+# UseCano=TRUE
+
 if(ID=="NA"){
   stop("You need to include the ID with the --ID option. Exit.")
 }
@@ -77,9 +89,11 @@ dir.create(out1, showWarnings = FALSE)
 dir.create(out2, showWarnings = FALSE)
 
 
+# graphical representation
 plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
 
   load(data)
+
   all=allPLOT
 
   if(offtar==F){all=all[which(grepl("Off-target",all[,4])==F),]}
@@ -122,11 +136,11 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
     ma=min(ma,5)
     mi=(-0.05)
     plot((pos[,4]/pos[,5])+1000,xlim=c(0-length(pos[,4])*0.24,length(pos[,4])*1.02),xaxs="i",yaxs="i",ylim=c(mi-(ma-mi)*0.5,ma),main=paste("Sample: ",ID,"  /  Position: ",chr,":",begin,"-",end,"\nAll targets",sep=""),xlab="",ylab="",yaxt='n',xaxt='n',cex.main=1.6)
-    
+
     # red box
     d1=which(pos[,1]>=begin & pos[,2]<=end)
     #polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-10,-10,1000,1000),col=rgb(1,0.9,1),border=NA)
-    rect(min(d1)-0.45,-10,max(d1)+0.45,100,col=rgb(1,0.9,1),border=NA)
+    rect(min(d1)-0.45,-10,max(d1)+0.45,5,col=rgb(1,0.9,1),border=NA)
     abline(h=mi-(ma-mi)*0.5)
 
     # boxes for dicarded
@@ -150,14 +164,16 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
     rect(-1000,-10,1000,mi,col="white",border=NA)
     d1=which(pos[,1]>=begin & pos[,2]<=end)
     #polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-1000,-1000,mi,mi),col=rgb(1,0.9,1),border=NA)
-    rect(min(d1)-0.45,-1000,max(d1)+0.45,mi,col=rgb(1,0.9,1),border=NA)
+    rect(min(d1)-0.45,-5,max(d1)+0.45,mi,col=rgb(1,0.9,1),border=NA)
     for (i in 1:dim(pos)[1]){
       if(pos[i,9]=="No"){
         rect(i-0.5,-1000,i+0.5,mi,col="lemonchiffon",border=NA)
       }
     }
 
-    
+    abline(v=0-length(pos[,4])*0.24)
+    abline(v=length(pos[,4])*1.02)
+    abline(h=mi-(ma-mi)*0.5)
     abline(h=1)
     
     for (i in 1:length(ya)){
@@ -416,8 +432,9 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
     
   }
 
+  all=all[which(all[,15]=="Yes"),]
+
   {
-    all=all[which(all[,15]=="Yes"),]
 
     # taking regions of interest
     sel=which(all[,1]==chr & as.numeric(all[,2])>=begin & as.numeric(all[,3])<=end)
@@ -446,7 +463,7 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
       pos[i,6]=as.numeric(d[which(as.numeric(d[,2])==pos[i,1]),13]) # SD
       pos[i,7]=min(pos[i,5]-pos[i,6],pos[i,4])/pos[i,5]
       pos[i,8]=max(pos[i,5]+pos[i,6],pos[i,4])/pos[i,5]
-      pos[i,9]=d[which(as.numeric(d[,2])==pos[i,1]),15]
+      pos[i,9]="Yes"
     }
 
     ma=max(1.5*1.05,(pos[,4]/pos[,5])*1.5)
@@ -456,7 +473,7 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
     # red box
     d1=which(pos[,1]>=begin & pos[,2]<=end)
     #polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-10,-10,1000,1000),col=rgb(1,0.9,1),border=NA)
-    rect(min(d1)-0.45,-10,max(d1)+0.45,1000,col=rgb(1,0.9,1),border=NA)
+    rect(min(d1)-0.45,-10,max(d1)+0.45,5,col=rgb(1,0.9,1),border=NA)
     abline(h=mi-(ma-mi)*0.5)
 
     # # boxes for dicarded
@@ -480,8 +497,11 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
     rect(-1000,-10,1000,mi,col="white",border=NA)
     d1=which(pos[,1]>=begin & pos[,2]<=end)
     #polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-1000,-1000,mi,mi),col=rgb(1,0.9,1),border=NA)
-    rect(min(d1)-0.45,-1000,max(d1)+0.45,mi,col=rgb(1,0.9,1),border=NA)
+    rect(min(d1)-0.45,-5,max(d1)+0.45,mi,col=rgb(1,0.9,1),border=NA)
     
+    abline(v=0-length(pos[,4])*0.24)
+    abline(v=length(pos[,4])*1.02)
+    abline(h=mi-(ma-mi)*0.5)
     abline(h=1)
     
     for (i in 1:length(ya)){
@@ -754,4 +774,4 @@ pdf=paste(out2,"/",ID,"-",chr,"-",begin,"-",end,"_on-targets.pdf",sep="")
 plotcnv(chr,begin,end,ID,data,pdf,side,FALSE,UseCano)
 
 
- 
+  

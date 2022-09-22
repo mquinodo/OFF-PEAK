@@ -76,6 +76,25 @@ if(databasefile=="NA"){
   stop("You need to include the database file with the --databasefile option. Exit.")
 }
 
+
+
+# folder="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2021-genome"
+# data="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2021/ALL.target.tsv"
+# mincor=0.9
+# minsignal=2500
+# maxvar=-0.2
+# leaveoneout=1
+# downsample=20000
+# nbFake=500
+# stopPC=0.0001
+# minZ=3
+# minOfftarget=1000
+# databasefile="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/refs/data-hg19.RData"
+# genomePlots=TRUE
+# chromoPlots=TRUE
+
+
+
 # loading libraries
 library(gplots) # for heatmap.2 function
 library(ExomeDepth) # for C_hmm function
@@ -116,6 +135,7 @@ write.table(out,file=paste(folder,"/01_general-stats/log_parameters.tsv",sep="")
 plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
 
   load(data)
+
   all=allPLOT
 
   if(offtar==F){all=all[which(grepl("Off-target",all[,4])==F),]}
@@ -158,11 +178,11 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
     ma=min(ma,5)
     mi=(-0.05)
     plot((pos[,4]/pos[,5])+1000,xlim=c(0-length(pos[,4])*0.24,length(pos[,4])*1.02),xaxs="i",yaxs="i",ylim=c(mi-(ma-mi)*0.5,ma),main=paste("Sample: ",ID,"  /  Position: ",chr,":",begin,"-",end,"\nAll targets",sep=""),xlab="",ylab="",yaxt='n',xaxt='n',cex.main=1.6)
-    
+
     # red box
     d1=which(pos[,1]>=begin & pos[,2]<=end)
     #polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-10,-10,1000,1000),col=rgb(1,0.9,1),border=NA)
-    rect(min(d1)-0.45,-10,max(d1)+0.45,100,col=rgb(1,0.9,1),border=NA)
+    rect(min(d1)-0.45,-10,max(d1)+0.45,5,col=rgb(1,0.9,1),border=NA)
     abline(h=mi-(ma-mi)*0.5)
 
     # boxes for dicarded
@@ -186,14 +206,16 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
     rect(-1000,-10,1000,mi,col="white",border=NA)
     d1=which(pos[,1]>=begin & pos[,2]<=end)
     #polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-1000,-1000,mi,mi),col=rgb(1,0.9,1),border=NA)
-    rect(min(d1)-0.45,-1000,max(d1)+0.45,mi,col=rgb(1,0.9,1),border=NA)
+    rect(min(d1)-0.45,-5,max(d1)+0.45,mi,col=rgb(1,0.9,1),border=NA)
     for (i in 1:dim(pos)[1]){
       if(pos[i,9]=="No"){
         rect(i-0.5,-1000,i+0.5,mi,col="lemonchiffon",border=NA)
       }
     }
 
-    
+    abline(v=0-length(pos[,4])*0.24)
+    abline(v=length(pos[,4])*1.02)
+    abline(h=mi-(ma-mi)*0.5)
     abline(h=1)
     
     for (i in 1:length(ya)){
@@ -452,8 +474,9 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
     
   }
 
+  all=all[which(all[,15]=="Yes"),]
+
   {
-    all=all[which(all[,15]=="Yes"),]
 
     # taking regions of interest
     sel=which(all[,1]==chr & as.numeric(all[,2])>=begin & as.numeric(all[,3])<=end)
@@ -482,7 +505,7 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
       pos[i,6]=as.numeric(d[which(as.numeric(d[,2])==pos[i,1]),13]) # SD
       pos[i,7]=min(pos[i,5]-pos[i,6],pos[i,4])/pos[i,5]
       pos[i,8]=max(pos[i,5]+pos[i,6],pos[i,4])/pos[i,5]
-      pos[i,9]=d[which(as.numeric(d[,2])==pos[i,1]),15]
+      pos[i,9]="Yes"
     }
 
     ma=max(1.5*1.05,(pos[,4]/pos[,5])*1.5)
@@ -492,7 +515,7 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
     # red box
     d1=which(pos[,1]>=begin & pos[,2]<=end)
     #polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-10,-10,1000,1000),col=rgb(1,0.9,1),border=NA)
-    rect(min(d1)-0.45,-10,max(d1)+0.45,1000,col=rgb(1,0.9,1),border=NA)
+    rect(min(d1)-0.45,-10,max(d1)+0.45,5,col=rgb(1,0.9,1),border=NA)
     abline(h=mi-(ma-mi)*0.5)
 
     # # boxes for dicarded
@@ -516,8 +539,11 @@ plotcnv <- function(chr,begin,end,ID,data,pdf,side,offtar,UseCano) {
     rect(-1000,-10,1000,mi,col="white",border=NA)
     d1=which(pos[,1]>=begin & pos[,2]<=end)
     #polygon(c(min(d1)-0.45,max(d1)+0.45,min(d1)-0.45,max(d1)+0.45),c(-1000,-1000,mi,mi),col=rgb(1,0.9,1),border=NA)
-    rect(min(d1)-0.45,-1000,max(d1)+0.45,mi,col=rgb(1,0.9,1),border=NA)
+    rect(min(d1)-0.45,-5,max(d1)+0.45,mi,col=rgb(1,0.9,1),border=NA)
     
+    abline(v=0-length(pos[,4])*0.24)
+    abline(v=length(pos[,4])*1.02)
+    abline(h=mi-(ma-mi)*0.5)
     abline(h=1)
     
     for (i in 1:length(ya)){
@@ -1276,6 +1302,8 @@ for(pat in colnames(dataALL)[5:num]){
       meanCOR2 <- apply(dataCOR2t, 2, mean) # calculate mean
     } else {
       dataCOR3=dataCOR2tCOR
+      sdCOR2 <- apply(dataCOR2t, 2, sd) 
+      meanCOR2 <- apply(dataCOR2t, 2, mean)
     }
     PCAmodel <- prcomp(dataCOR3, center = TRUE,scale. = TRUE)
 
@@ -1283,10 +1311,14 @@ for(pat in colnames(dataALL)[5:num]){
     pdf(file=paste(folder,"/06_PC-plots","/Variance-explained-",pat,".pdf",sep=""),width=14,height=7)
     par(mfrow=c(1,2))
     plot(var,cex=0.5,xlab="PC number",ylab="Percent variance explained",main=paste("Variance explained for ",pat,sep=""))
-    abline(v=max(remPC),col=4)
+    if(length(remPC)>0){abline(v=max(remPC),col=4)} else {abline(v=0,col=4)}
     legend("topright",cex=0.8,legend=c("Number of PCs to remove"),col=c("blue"),pch=NA,lty=c(1),lwd=c(2))
-    plot(var,cex=0.5,xlab="PC number",ylab="Percent variance explained",main=paste("Zoom for ",pat,sep=""),xlim=c(0,min(max(remPC)+10,dim(dataCOR)[2]-4)))
-    abline(v=max(remPC),col=4)
+    if(length(remPC)>0){
+      plot(var,cex=0.5,xlab="PC number",ylab="Percent variance explained",main=paste("Zoom for ",pat,sep=""),xlim=c(0,min(max(remPC)+10,dim(dataCOR)[2]-4)))
+    } else {
+      plot(var,cex=0.5,xlab="PC number",ylab="Percent variance explained",main=paste("Zoom for ",pat,sep=""),xlim=c(0,min(0+10,dim(dataCOR)[2]-4)))
+    }
+    if(length(remPC)>0){abline(v=max(remPC),col=4)} else {abline(v=0,col=4)}
     legend("topright",cex=0.8,legend=c("Number of PCs to remove"),col=c("blue"),pch=NA,lty=c(1),lwd=c(2))
     dev.off()
 
@@ -1348,6 +1380,8 @@ for(pat in colnames(dataALL)[5:num]){
       meanPLOT2 <- apply(dataPLOT2t, 2, mean) # calculate mean
     } else {
       dataPLOT3=dataPLOT2tCOR
+      sdPLOT2 <- apply(dataPLOT2t, 2, sd)
+      meanPLOT2 <- apply(dataPLOT2t, 2, mean)
     }
     PCAmodel <- prcomp(dataPLOT3, center = TRUE,scale. = TRUE)
 
@@ -1368,8 +1402,16 @@ for(pat in colnames(dataALL)[5:num]){
       allPLOT[select,10]=round((as.numeric(allPLOT[select,11])-as.numeric(allPLOT[select,12]))/as.numeric(allPLOT[select,13]),digits=2)
     }
 
-    allPLOT[,15]="No"
-    allPLOT[which(is.element(allPLOT[,4],takenPLOT)==T),15]="Yes"
+    allPLOT=allPLOT[which(is.element(allPLOT[,4],all[,4])==F),]
+    allPLOT[,15]="Yes"
+
+    allPLOT2=all
+    allPLOT2[,15]="No"
+
+    allPLOT=rbind(allPLOT,allPLOT2)
+
+    allPLOT=allPLOT[order(as.numeric(allPLOT[,2]),decreasing=FALSE),]
+    allPLOT=allPLOT[order(allPLOT[,1],decreasing=FALSE),]
 
     save(allPLOT,file=paste(folder,"/05_RData-files/data-plot-",pat,".RData",sep=""))
 
@@ -1935,6 +1977,7 @@ for(pat in colnames(dataALL)[5:num]){
 
 
 print("Writing outputs and plots for all targets")
+save(BOTHsave,file=paste(folder,"/05_RData-files/data-BOTHsave.RData",sep=""))
 
 {
 
@@ -2190,6 +2233,8 @@ print("Writing outputs and plots for all targets")
 
 
 print("Writing outputs and plots for on-targets only")
+save(TARsave,file=paste(folder,"/05_RData-files/data-TARsave.RData",sep=""))
+
 
 {
 

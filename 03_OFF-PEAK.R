@@ -78,8 +78,8 @@ if(databasefile=="NA"){
 
 
 
-# folder="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2021-genome"
-# data="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2021/ALL.target.tsv"
+# folder="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2020-plot"
+# data="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2020/ALL.target.tsv"
 # mincor=0.9
 # minsignal=2500
 # maxvar=-0.2
@@ -87,7 +87,7 @@ if(databasefile=="NA"){
 # downsample=20000
 # nbFake=500
 # stopPC=0.0001
-# minZ=3
+# minZ=4
 # minOfftarget=1000
 # databasefile="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/refs/data-hg19.RData"
 # genomePlots=TRUE
@@ -1403,10 +1403,10 @@ for(pat in colnames(dataALL)[5:num]){
     }
 
     allPLOT=allPLOT[which(is.element(allPLOT[,4],all[,4])==F),]
-    allPLOT[,15]="Yes"
+    allPLOT[,15]="No"
 
     allPLOT2=all
-    allPLOT2[,15]="No"
+    allPLOT2[,15]="Yes"
 
     allPLOT=rbind(allPLOT,allPLOT2)
 

@@ -106,7 +106,7 @@ Rscript 04_OFF-PEAK-plot.R
   --chr chr
   --begin begin
   --end end
-  --data 05_RData-files/data-ID.RData
+  --data 05_RData-files/data-plot-ID.RData
   --out output-directory
   --databasefile data-hg19.RData
   [other options]
@@ -118,7 +118,7 @@ Option | Value | Description
 --chr | STRING | Chromosome
 --begin | number | Begin position of CNV
 --end | number | End position of CNV
---data | STRING | Intermediate RData file outputted in step 3 (in 05_RData-files folder)
+--data | STRING | Intermediate RData file outputted in step 4 (in 05_RData-files folder; use data-plot-ID.RData and not data-ID.RData)
 --out | STRING | Output directory
 --databasefile | STRING | Absolute path to RData file containing various information (data-hg19.RData or data-hg38.RData)
 

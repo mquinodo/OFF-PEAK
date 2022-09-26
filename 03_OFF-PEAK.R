@@ -45,7 +45,10 @@ option_list = list(
               help="Will do coverage plots per chromosome"),
 
   make_option(c("--genome-plots"), action="store_true", default=FALSE, 
-              help="Will do genome-wide coverage plots")
+              help="Will do genome-wide coverage plots"),
+
+  make_option(c("--nb-plots"), action="numeric", default="20", 
+              help="Number of plots for CNVs per individual")
 ); 
  
 opt_parser = OptionParser(option_list=option_list);
@@ -65,6 +68,7 @@ minOfftarget=as.numeric(args[11])
 databasefile=as.character(args[12])
 chromoPlots=as.logical(args[13])
 genomePlots=as.logical(args[14])
+nbPlots=as.numeric(args[15])
 
 if(data=="NA"){
   stop("You need to include the files containing the readcount per target with the --data option. Exit.")
@@ -92,6 +96,7 @@ if(databasefile=="NA"){
 # databasefile="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/refs/data-hg19.RData"
 # genomePlots=TRUE
 # chromoPlots=TRUE
+# nbPlots=20
 
 
 
@@ -2215,7 +2220,7 @@ save(BOTHsave,file=paste(folder,"/05_RData-files/data-BOTHsave.RData",sep=""))
     if (dim(allBOTH)[1]>0){
       nb=length(which(abs(as.numeric(allBOTH[,10]))>5))
       if (nb>0){
-        for (i in 1:min(dim(allBOTH)[1],nb,20)){
+        for (i in 1:min(dim(allBOTH)[1],nb,nbPlots)){
           if(as.numeric(allBOTH[i,16])<1000){
             chr=allBOTH[i,1]
             begin=as.numeric(allBOTH[i,2])
@@ -2473,7 +2478,7 @@ save(TARsave,file=paste(folder,"/05_RData-files/data-TARsave.RData",sep=""))
     if (dim(allBOTH)[1]>0){
       nb=length(which(abs(as.numeric(allBOTH[,10]))>5))
       if (nb>0){
-        for (i in 1:min(dim(allBOTH)[1],nb,20)){
+        for (i in 1:min(dim(allBOTH)[1],nb,nbPlots)){
           if(as.numeric(allBOTH[i,16])<1000){
             chr=allBOTH[i,1]
             begin=as.numeric(allBOTH[i,2])

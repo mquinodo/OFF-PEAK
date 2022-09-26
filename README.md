@@ -96,7 +96,7 @@ Option | Default | Value | Description
 --minOfftarget | 1000 | 1 - Inf | Minimal size of off-targets without exons.
 --chromosome-plots | - | - | If present, coverage plots for each chromosome will be done.
 --genome-plots | - | - | If present, genome-wide coverage plots will be done.
---nb-plots | 20 | 0 - Inf | Number of plots for CNVs per individual
+--nb-plots | 10 | 0 - Inf | Number of plots for CNVs per individual
 
 ### 4) CNV plotting
 In step 3 , the 20 best CNVs per sample will be automatically plotted. This script is used to further plot other CNVs. The main script 04_OFF-PEAK-plot.R takes as input intermediate data from step 3 in order to do additional plots.

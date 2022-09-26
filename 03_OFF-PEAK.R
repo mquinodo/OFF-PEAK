@@ -47,7 +47,7 @@ option_list = list(
   make_option(c("--genome-plots"), action="store_true", default=FALSE, 
               help="Will do genome-wide coverage plots"),
 
-  make_option(c("--nb-plots"), action="numeric", default="20", 
+  make_option(c("--nb-plots"), action="numeric", default="10", 
               help="Number of plots for CNVs per individual")
 ); 
  
@@ -79,26 +79,6 @@ if(folder=="NA"){
 if(databasefile=="NA"){
   stop("You need to include the database file with the --databasefile option. Exit.")
 }
-
-
-
-# folder="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2023-small-plot"
-# data="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2023-small/ALL.target.tsv"
-# mincor=0.9
-# minsignal=2500
-# maxvar=-0.2
-# leaveoneout=1
-# downsample=20000
-# nbFake=500
-# stopPC=0.0001
-# minZ=4
-# minOfftarget=1000
-# databasefile="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/refs/data-hg19.RData"
-# genomePlots=TRUE
-# chromoPlots=TRUE
-# nbPlots=20
-
-
 
 
 # loading libraries

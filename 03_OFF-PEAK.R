@@ -78,8 +78,8 @@ if(databasefile=="NA"){
 
 
 
-# folder="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2020-plot"
-# data="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2020/ALL.target.tsv"
+# folder="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2023-small-plot"
+# data="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2023-small/ALL.target.tsv"
 # mincor=0.9
 # minsignal=2500
 # maxvar=-0.2
@@ -2029,7 +2029,10 @@ save(BOTHsave,file=paste(folder,"/05_RData-files/data-BOTHsave.RData",sep=""))
           BOTHsave[i,34]=l1
           BOTHsave[i,35]=l2
 
-          k1=exonschr[which(exonschr[,1]==BOTHsave[i,1] & (  (as.numeric(exonschr[,2])>=as.numeric(BOTHsave[i,2]) & as.numeric(exonschr[,2])<=as.numeric(BOTHsave[i,3])) | (as.numeric(exonschr[,3])>=as.numeric(BOTHsave[i,2]) & as.numeric(exonschr[,3])<=as.numeric(BOTHsave[i,3])) | (as.numeric(exonschr[,2])<=as.numeric(BOTHsave[i,2]) & as.numeric(exonschr[,3])>=as.numeric(BOTHsave[i,3]))  )),4]
+          k01=which(exonschr[,1]==BOTHsave[i,1] & as.numeric(exonschr[,2])>=as.numeric(BOTHsave[i,2]) & as.numeric(exonschr[,2])<=as.numeric(BOTHsave[i,3]))
+          k02=which(exonschr[,1]==BOTHsave[i,1] & as.numeric(exonschr[,3])>=as.numeric(BOTHsave[i,2]) & as.numeric(exonschr[,3])<=as.numeric(BOTHsave[i,3]))
+          k03=which(exonschr[,1]==BOTHsave[i,1] & as.numeric(exonschr[,2])<=as.numeric(BOTHsave[i,2]) & as.numeric(exonschr[,3])>=as.numeric(BOTHsave[i,3]))
+          k1=exonschr[unique(c(k01,k02,k03)),4]
           k2=strsplit(k1,"_")
           k3=unique(unlist(k2))
           k4=k3[-which(grepl("exon",k3)==T | grepl("chr",k3)==T | grepl("\\.",k3)==T | grepl("Off-target",k3)==T | k3=="NM")]
@@ -2287,7 +2290,10 @@ save(TARsave,file=paste(folder,"/05_RData-files/data-TARsave.RData",sep=""))
           TARsave[i,34]=l1
           TARsave[i,35]=l2
 
-          k1=exonschr[which(exonschr[,1]==TARsave[i,1] & (  (as.numeric(exonschr[,2])>=as.numeric(TARsave[i,2]) & as.numeric(exonschr[,2])<=as.numeric(TARsave[i,3])) | (as.numeric(exonschr[,3])>=as.numeric(TARsave[i,2]) & as.numeric(exonschr[,3])<=as.numeric(TARsave[i,3])) | (as.numeric(exonschr[,2])<=as.numeric(TARsave[i,2]) & as.numeric(exonschr[,3])>=as.numeric(TARsave[i,3]))  )),4]
+          k01=which(exonschr[,1]==TARsave[i,1] & as.numeric(exonschr[,2])>=as.numeric(TARsave[i,2]) & as.numeric(exonschr[,2])<=as.numeric(TARsave[i,3]))
+          k02=which(exonschr[,1]==TARsave[i,1] & as.numeric(exonschr[,3])>=as.numeric(TARsave[i,2]) & as.numeric(exonschr[,3])<=as.numeric(TARsave[i,3]))
+          k03=which(exonschr[,1]==TARsave[i,1] & as.numeric(exonschr[,2])<=as.numeric(TARsave[i,2]) & as.numeric(exonschr[,3])>=as.numeric(TARsave[i,3]))
+          k1=exonschr[unique(c(k01,k02,k03)),4]
           k2=strsplit(k1,"_")
           k3=unique(unlist(k2))
           k4=k3[-which(grepl("exon",k3)==T | grepl("chr",k3)==T | grepl("\\.",k3)==T | grepl("Off-target",k3)==T | k3=="NM")]

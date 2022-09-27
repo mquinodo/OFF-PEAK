@@ -47,7 +47,7 @@ option_list = list(
   make_option(c("--genome-plots"), action="store_true", default=FALSE, 
               help="Will do genome-wide coverage plots"),
 
-  make_option(c("--nb-plots"), action="numeric", default="10", 
+  make_option(c("--nb-plots"), type="numeric", default="10", 
               help="Number of plots for CNVs per individual")
 ); 
  

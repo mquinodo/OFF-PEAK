@@ -2000,8 +2000,8 @@ save(BOTHsave,file=paste(folder,"/05_RData-files/data-BOTHsave.RData",sep=""))
         for (i in 1:length(sel)){
           m1=which(allchr[,1]==BOTHsave[i,1] & as.numeric(allchr[,3])<=as.numeric(BOTHsave[i,2]))
           m2=which(allchr[,1]==BOTHsave[i,1] & as.numeric(allchr[,2])>=as.numeric(BOTHsave[i,3]))
-          if(length(m1)>0){l1=max(as.numeric(allchr[m1,3]))} else {l1=BOTHsave[i,2]}
-          if(length(m2)>0){l2=min(as.numeric(allchr[m2,2]))} else {l2=BOTHsave[i,3]}
+          if(length(m1)>0){l1=max(as.numeric(allchr[m1,3]))} else {l1=as.numeric(BOTHsave[i,2])}
+          if(length(m2)>0){l2=min(as.numeric(allchr[m2,2]))} else {l2=as.numeric(BOTHsave[i,3])}
           k1=exonschr[which(exonschr[,1]==BOTHsave[i,1] & (  (as.numeric(exonschr[,2])>=l1 & as.numeric(exonschr[,2])<=l2) | (as.numeric(exonschr[,3])>=l1 & as.numeric(exonschr[,3])<=l2) | (as.numeric(exonschr[,2])<=l1 & as.numeric(exonschr[,3])>=l2)  )),4]
           k2=strsplit(k1,"_")
           k3=unique(unlist(k2))
@@ -2025,6 +2025,7 @@ save(BOTHsave,file=paste(folder,"/05_RData-files/data-BOTHsave.RData",sep=""))
           k5[which(k5=="")]="-"
           BOTHsave[i,22]=k5
           k6=paste(k1,collapse=";")
+          if(k6==""){k6="-"}
           BOTHsave[i,31]=k6
         }
         temp[sel,]=BOTHsave
@@ -2261,8 +2262,8 @@ save(TARsave,file=paste(folder,"/05_RData-files/data-TARsave.RData",sep=""))
         for (i in 1:length(sel)){
           m1=which(allchr[,1]==TARsave[i,1] & as.numeric(allchr[,3])<=as.numeric(TARsave[i,2]))
           m2=which(allchr[,1]==TARsave[i,1] & as.numeric(allchr[,2])>=as.numeric(TARsave[i,3]))
-          if(length(m1)>0){l1=max(as.numeric(allchr[m1,3]))} else {l1=TARsave[i,2]}
-          if(length(m2)>0){l2=min(as.numeric(allchr[m2,2]))} else {l2=TARsave[i,3]}
+          if(length(m1)>0){l1=max(as.numeric(allchr[m1,3]))} else {l1=as.numeric(TARsave[i,2])}
+          if(length(m2)>0){l2=min(as.numeric(allchr[m2,2]))} else {l2=as.numeric(TARsave[i,3])}
           k1=exonschr[which(exonschr[,1]==TARsave[i,1] & (  (as.numeric(exonschr[,2])>=l1 & as.numeric(exonschr[,2])<=l2) | (as.numeric(exonschr[,3])>=l1 & as.numeric(exonschr[,3])<=l2) | (as.numeric(exonschr[,2])<=l1 & as.numeric(exonschr[,3])>=l2)  )),4]
           k2=strsplit(k1,"_")
           k3=unique(unlist(k2))
@@ -2286,6 +2287,7 @@ save(TARsave,file=paste(folder,"/05_RData-files/data-TARsave.RData",sep=""))
           k5[which(k5=="")]="-"
           TARsave[i,22]=k5
           k6=paste(k1,collapse=";")
+          if(k6==""){k6="-"}
           TARsave[i,31]=k6
         }
         temp[sel,]=TARsave

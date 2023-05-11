@@ -2,8 +2,6 @@
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)
 
-# $NAS/NGS/RefSeq/hg19_both.sort.bed $file.exons-non-coding.targets.tsv
-
 a=read.table(file=args[1],header=F)
 b=read.table(file=args[2],header=F)
 
@@ -19,5 +17,4 @@ for (i in com){
 }
 
 write.table(a,file=args[3],quote=F,sep="\t",row.names=F, col.names=F)
-
 

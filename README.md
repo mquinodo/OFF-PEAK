@@ -28,6 +28,8 @@ bash 01_targets-processing.sh
   --ref ref_genome.fa
   [other options]
 ```
+Output files will be placed in the data folder.
+
 #### Required arguments
 Option | Value | Description
 --- | --- | ---

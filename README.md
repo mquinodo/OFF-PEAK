@@ -73,8 +73,8 @@ It is called with Rscript and its computation time is ~1 hour per 10 samples:
 ```
 Rscript 03_OFF-PEAK.R
   --output output_directory
-  --data target-coverage.tsv
-  --databasefile data-hg19.RData
+  --data ALL.target.tsv
+  --databasefile data/data-hg19.RData
   [other options]
 ```
 #### Required arguments
@@ -109,7 +109,7 @@ Rscript 04_OFF-PEAK-plot.R
   --chr chr
   --begin begin
   --end end
-  --data 05_RData-files/data-plot-ID.RData
+  --batch output_directory
   --out output-directory
   --databasefile data-hg19.RData
   [other options]
@@ -121,7 +121,7 @@ Option | Value | Description
 --chr | STRING | Chromosome
 --begin | number | Begin position of CNV
 --end | number | End position of CNV
---data | STRING | Intermediate RData file outputted in step 4 (in 05_RData-files folder; use data-plot-ID.RData and not data-ID.RData)
+--batch | STRING | Output directory of step 3 (output_directory)
 --out | STRING | Output directory
 --databasefile | STRING | Absolute path to RData file containing various information (data-hg19.RData or data-hg38.RData)
 

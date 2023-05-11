@@ -50,7 +50,7 @@ Option | Default | Value | Description
 
 ### 2) Coverage computation
 The main script 02_coverage-count.sh takes as input a text file listing the sample BAM files and IDs as well as the processed BED file from step 1. It is outputing a file containing the coverage for each sample and for each target.
-It is called with bash and its computation time is 2-3 minutes per BAM file:
+It is called with bash and its computation time is 2-3 minutes per sample for WES:
 ```
 bash 02_coverage-count.sh
   --listBAM list_BAM.txt

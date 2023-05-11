@@ -24,7 +24,7 @@ It is called with bash and its computation time for an exome BED file is few min
 bash 01_targets-processing.sh
   --genome [hg19|hg38]
   --targets target.bed
-  --out output-name
+  --name panel
   --ref ref_genome.fa
   [other options]
 ```
@@ -35,7 +35,7 @@ Option | Value | Description
 --- | --- | ---
 --targets | STRING | BED file containing the target regions of the exome or targeted sequencing
 --genome | [hg19/hg38] | Genome build used
---out | STRING | Name of the output file (without extension)
+--name | STRING | Name of the output file (without extension)
 --ref | STRING | Reference genome in FASTA format
 
 #### Optional arguments

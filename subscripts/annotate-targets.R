@@ -36,7 +36,6 @@ for (i in 1:dim(a)[1]){
 	}
 	if(length(overlap)>0){
 		a[i,5]="Yes"
-		#a[i,3]=temp2[overlap,3]
 		done=1
 	}
 
@@ -47,7 +46,6 @@ for (i in 1:dim(a)[1]){
 	}
 	if(length(overlap)>0){
 		a[i,5]="Yes"
-		#a[i,2]=temp2[overlap,2]
 		done=1
 	}
 

@@ -56,7 +56,7 @@ bash 02_coverage-count.sh
   --listBAM list_BAM.txt
   --mosdepth mosdepth-executable
   --work output_directory
-  --targetsBED processed-targets.bed
+  --targetsBED target-panel.bed
 ```
 #### Required arguments
 Option | Value | Description

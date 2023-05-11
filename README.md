@@ -36,7 +36,7 @@ Option | Value | Description
 --targets | STRING | BED file containing the target regions of the exome or targeted sequencing
 --genome | [hg19/hg38] | Genome build used
 --name | STRING | Name of the output file (without extension)
---ref | STRING | Reference genome in FASTA format
+--ref | STRING | Reference genome in FASTA format (same as used to map the reads in BAM files)
 
 #### Optional arguments
 Option | Default | Value | Description

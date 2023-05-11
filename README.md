@@ -28,7 +28,7 @@ bash 01_targets-processing.sh
   --ref ref_genome.fa
   [other options]
 ```
-Output files will be placed in the data folder.
+The output file (target-panel.bed) will be placed in the data folder.
 
 #### Required arguments
 Option | Value | Description
@@ -56,7 +56,7 @@ bash 02_coverage-count.sh
   --listBAM list_BAM.txt
   --mosdepth mosdepth-executable
   --work output_directory
-  --targetsBED target-panel.bed
+  --targetsBED data/target-panel.bed
 ```
 #### Required arguments
 Option | Value | Description

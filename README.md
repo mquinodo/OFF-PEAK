@@ -24,7 +24,7 @@ It is called with bash and its computation time for an exome BED file is few min
 bash 01_targets-processing.sh
   --genome [hg19|hg38]
   --targets target.bed
-  --name panel
+  --name target-panel
   --ref ref_genome.fa
   [other options]
 ```

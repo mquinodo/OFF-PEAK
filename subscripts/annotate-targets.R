@@ -61,4 +61,3 @@ for (i in 1:dim(a)[1]){
 
 write.table(a[which(a[,5]=="Yes"),1:4],file=args[3],quote=F,sep="\t",row.names=F, col.names=F)
 write.table(a[which(a[,5]=="No"),1:4],file=args[4],quote=F,sep="\t",row.names=F, col.names=F)
-

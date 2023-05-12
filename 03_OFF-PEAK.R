@@ -1,5 +1,4 @@
 
-
 #!/usr/bin/env Rscript
 
 library(optparse)
@@ -79,6 +78,24 @@ if(folder=="NA"){
 if(databasefile=="NA"){
   stop("You need to include the database file with the --databasefile option. Exit.")
 }
+
+
+# folder="/home/mquinodo/SYNO/WES/EXOMES/Carmen_Igor/12_OFF-PEAK"
+# data="/home/mquinodo/SYNO/WES/EXOMES/Carmen_Igor/12_OFF-PEAK/ALL.target.tsv"
+# mincor=0.9
+# minsignal=2500
+# maxvar=-0.2
+# leaveoneout=1
+# downsample=20000
+# nbFake=500
+# stopPC=0.0001
+# minZ=4
+# minOfftarget=1000
+# databasefile="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/refs/data-hg19.RData"
+# genomePlots=TRUE
+# chromoPlots=TRUE
+# nbPlots=10
+
 
 
 # loading libraries
@@ -930,6 +947,9 @@ returnAUC <- function(all,fakeCNV) {
 {
   # res is matrix for correlations
   num=dim(dataALL)[2]
+  if(num-4<=5){
+    stop(paste("You need to analyze at least 6 samples to run OFF-PEAK. You provided ",num-4," samples. Exit.",sep=""))
+  }
   correlation=matrix(nrow=(num-4),ncol=(num-4))
   colnames(correlation)=colnames(dataALL)[5:dim(dataALL)[2]]
   rownames(correlation)=colnames(dataALL)[5:dim(dataALL)[2]]
@@ -1013,7 +1033,8 @@ for(pat in colnames(dataALL)[5:num]){
     rem=which(correlation[selpat-4,]<mincor)
     
     if(num-length(rem)-4<=15){
-      print(paste("WARNING: less than 15 other samples with R2>",mincor,", taking 15 samples with highest correlation. This can lead to decreased performances.",sep=""))
+      mini=min(num-4-1,15)
+      print(paste("WARNING: less than 15 other samples with R2>",mincor,", taking ",mini," samples with highest correlation. This can lead to decreased performances.",sep=""))
       rem=which(num-4-rank(correlation[selpat-4,])>15)
     }
     if(length(rem)>0){
@@ -1965,7 +1986,7 @@ for(pat in colnames(dataALL)[5:num]){
 print("Writing outputs and plots for all targets")
 save(BOTHsave,file=paste(folder,"/05_RData-files/data-BOTHsave.RData",sep=""))
 
-{
+if(dim(BOTHsave)[1]>0){
 
   BOTHsave=cbind(BOTHsave,BOTHsave[,1:10],BOTHsave[,21],BOTHsave[,17:21],BOTHsave[,17:19])
   colnames(BOTHsave)[21:40]=c("Nb_overlapping_samples","Genes","Type","Ploidy","PQ","gnomAD-CNV_1%","ClinVar-patho_included","ncRNAs","gnomAD-CNV_ALL","ClinVar-patho_overlap","Exons","CQ","QUAL","Begin-min","End-max","Genes-possible","Exons-possible","Nb-exon-before-chr","Nb-exon-after-chr","RefSeq_Functional_Element")
@@ -2226,7 +2247,7 @@ print("Writing outputs and plots for on-targets only")
 save(TARsave,file=paste(folder,"/05_RData-files/data-TARsave.RData",sep=""))
 
 
-{
+if(dim(TARsave)[1]>0){
 
   TARsave=cbind(TARsave,TARsave[,1:10],TARsave[,21],TARsave[,17:21],TARsave[,17:19])
   colnames(TARsave)[21:40]=c("Nb_overlapping_samples","Genes","Type","Ploidy","Ploidy-qual","gnomAD-CNV_1%","ClinVar-patho_included","ncRNAs","gnomAD-CNV_ALL","ClinVar-patho_overlap","Exons","CNV-qual","QUAL","Begin-min","End-max","Genes-possible","Exons-possible","Nb-exon-before-chr","Nb-exon-after-chr","RefSeq_Functional_Element")

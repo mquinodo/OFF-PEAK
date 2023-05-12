@@ -19,7 +19,7 @@ option_list = list(
   make_option(c("--side"), type="numeric", default=10, 
               help="number of side targets to plot", metavar="numeric"),
 
-  make_option(c("--data"), type="character", default="NA", 
+  make_option(c("--batch"), type="character", default="NA", 
               help="RData file with data", metavar="character"),
 
   make_option(c("--out"), type="character", default="NA", 
@@ -40,22 +40,10 @@ chr=as.character(args[2])
 begin=as.numeric(args[3])
 end=as.numeric(args[4])
 side=as.numeric(args[5])
-data=as.character(args[6])
+data=paste(as.character(args[6]),"/05_RData-files/data-plot-",ID,".RData",sep="")
 out=as.character(args[7])
 databasefile=as.character(args[8])
 UseCano=as.character(args[9])
-
-
-
-# ID="CHlaus0003"
-# chr="chr19"
-# begin=54610369
-# end=54657577
-# side=20
-# data="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2020-t/05_RData-files/data-plot-CHlaus0003.RData"
-# out="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/unsolved-2020-t/CHlaus0003-2"
-# databasefile="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/refs/data-hg19.RData"
-# UseCano=TRUE
 
 if(ID=="NA"){
   stop("You need to include the ID with the --ID option. Exit.")

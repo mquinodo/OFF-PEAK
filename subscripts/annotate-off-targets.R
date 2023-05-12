@@ -17,4 +17,3 @@ for (i in com){
 }
 
 write.table(a,file=args[3],quote=F,sep="\t",row.names=F, col.names=F)
-

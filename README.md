@@ -8,8 +8,7 @@ It can be used under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0
 ## Prerequisites
 + BEDTools [[Link](https://bedtools.readthedocs.io/en/latest/content/installation.html)] (>= v2.25.0)
 + mosdepth [[Link](https://github.com/brentp/mosdepth)] (>= v0.3.3)
-+ R [[Link](https://cran.r-project.org/mirrors.html)] (>= v3.2.0)
-+ R libraries: optparse, gplots, ExomeDepth, pROC and caTools
++ R [[Link](https://cran.r-project.org/mirrors.html)] (>= v3.2.0) with following libraries: optparse, gplots, ExomeDepth, pROC and caTools
 
 ## Installation
 The tool does not require compilation.

@@ -127,7 +127,7 @@ Option | Value | Description
 #### Optional arguments
 Option | Default | Value | Description
 --- | --- | --- | ---
---side | 10 | 1 - 100 | Number of target plotted on each side of the region.
+--side | 20 | 1 - 100 | Number of target plotted on each side of the region.
 
 
 ## Output files

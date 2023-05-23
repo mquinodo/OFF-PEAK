@@ -48,7 +48,7 @@ Option | Default | Value | Description
 
 
 ### 2) Coverage computation
-The main script 02_coverage-count.sh takes as input a text file listing the sample BAM files and IDs as well as the processed BED file from step 1. It is outputing a file containing the coverage for each sample and for each target.
+The main script 02_coverage-count.sh takes as input a text file listing the sample BAM files (.bai index files are needed in the same folder, they can be generated with samtools index command) and IDs as well as the processed BED file from step 1. It is outputing a file containing the coverage for each sample and for each target.
 It is called with bash and its computation time is 2-3 minutes per sample for WES:
 ```
 bash 02_coverage-count.sh
@@ -60,7 +60,7 @@ bash 02_coverage-count.sh
 #### Required arguments
 Option | Value | Description
 --- | --- | ---
---listBAM | STRING | Text file containing two tab-delimited columns: BAM files and IDs. It can also have only one column with BAM files. In this case, IDs will be deduced from the name of BAM files (not recommended).
+--listBAM | STRING | Text file containing two tab-delimited columns: BAM files (with absolute location, for example /user/Download/Patient1.bam) and IDs (for example Patient1). It can also have only one column with BAM files. In this case, IDs will be deduced from the name of BAM files (not recommended).
 --mosdepth | STRING | Mosdepth executable file that can be downloaded from the github page here: [[Link](https://github.com/brentp/mosdepth/releases/download/v0.3.3/mosdepth)]
 --work | STRING | Output directory
 --targetsBED | STRING | BED file with processed targets produced in step 1

@@ -16,7 +16,7 @@ option_list = list(
   make_option(c("--end"), type="numeric", default=NA, 
               help="end of CNV", metavar="numeric"),
 
-  make_option(c("--side"), type="numeric", default=10, 
+  make_option(c("--side"), type="numeric", default=20, 
               help="number of side targets to plot", metavar="numeric"),
 
   make_option(c("--batch"), type="character", default="NA", 

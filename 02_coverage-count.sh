@@ -55,6 +55,24 @@ echo "Step 1: Using mosdepth to extract coverage for each on-target and off-targ
 if [[ `awk -F"\t" 'NF==1' $listBAM` ]]; then
     echo "   Only one field detected. ID will be deduced from the BAM file name"
 fi
+
+# check that all BAM files exists
+while read file
+do
+	a=$(echo $file | awk -F" " '{print NF}')
+	if [[ "$a" == 1 ]]; then
+		pat=$(echo $file | cut -f1 -d" " | awk -F"\t" '{n=split($1,a,"/"); split(a[n],b,".bam"); print b[1]}')
+		bam=$(echo $file | cut -f1 -d" ")
+	fi
+	if [ $a -gt 1 ]; then
+		pat=$(echo $file | cut -f2 -d" ")
+		bam=$(echo $file | cut -f1 -d" ")
+	fi
+	if [ ! -f $bam ]; then
+		echo "## ERROR: BAM file $bam not found. Exit." 1>&2; exit 1;
+	fi
+done < $listBAM
+
 rm -f $work/list.txt
 touch $work/list.txt
 # coverage from the bam files with mosdepth 
@@ -87,6 +105,7 @@ do
 		rm $work/$pat.regions.bed.gz $work/$pat.regions.bed $work/$pat.mosdepth* $work/$pat.regions.bed.gz.csi
 	fi
 done < $listBAM
+
 rm $work/targetsBED.bed
 
 echo "Step 2: Merging individual coverage files into one file"

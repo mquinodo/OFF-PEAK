@@ -46,7 +46,7 @@ if [ -z "${targetsBED}" ]; then
     notargetsBED
 fi
 
-sed -i '/^$/d' $listBAM
+sed '/^$/d' $listBAM > $listBAM.temp
 
 mkdir -p $work
 cut -f1-4 $targetsBED > $work/targetsBED.bed
@@ -69,9 +69,10 @@ do
 		bam=$(echo $file | cut -f1 -d" ")
 	fi
 	if [ ! -f $bam ]; then
+		rm $listBAM.temp
 		echo "## ERROR: BAM file $bam not found. Exit." 1>&2; exit 1;
 	fi
-done < $listBAM
+done < $listBAM.temp
 
 rm -f $work/list.txt
 touch $work/list.txt
@@ -104,18 +105,23 @@ do
 		# cleaning
 		rm $work/$pat.regions.bed.gz $work/$pat.regions.bed $work/$pat.mosdepth* $work/$pat.regions.bed.gz.csi
 	fi
-done < $listBAM
+done < $listBAM.temp
 
-rm $work/targetsBED.bed
+rm $work/targetsBED.bed $listBAM.temp
 
 echo "Step 2: Merging individual coverage files into one file"
 # processing of coverage files to merge them and add header
 printf "Chr\tbegin\tend\tname\tGC" > $work/header.target.tsv
 cut -f1-5 $targetsBED  > $work/target.only.tsv
+nb=$(wc -l $work/target.only.tsv)
 
 for pat in $(cat $work/list.txt)
 do
 	echo "   Processing sample $pat"
+	nb2=$(wc -l $work/coverage/$pat.cov.tsv)
+	if [[ "$nb" != "$nb2" ]]; then
+		echo "## ERROR: coverage file coverage/$pat.cov.tsv is incomplete. Please check the file and rerun the script. Exit." 1>&2; exit 1;
+	fi
 	cut -f5 $work/coverage/$pat.cov.tsv > $work/$pat.cov.only.tsv
 	cat $work/target.only.tsv > $work/temp.tsv
 	paste -d"\t" $work/temp.tsv $work/$pat.cov.only.tsv > $work/target.only.tsv

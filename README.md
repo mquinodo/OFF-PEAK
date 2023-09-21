@@ -3,7 +3,7 @@ CNV detection tool for WES data
 
 This software was written by Mathieu Quinodoz in the group of Prof. Rivolta from the IOB in Basel, Switzerland. It was developped on Ubuntu 22.04.1 LTS.
 
-It can be used under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. For commercial uses of OFF-PEAK, please contact mathieu.quinodoz[at]iob.ch.
+OFF-PEAK can be used under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. For all commercial uses of OFF-PEAK, including the sale, lease, license, or transfer of OFF-PEAK or of results gained directly through OFF-PEAK to a for-profit organization, and for all contract research activities employing OFF-PEAK or make use of results gained directly through OFF-PEAK, please contact the authors.
 
 ## Prerequisites
 + BEDTools [[Link](https://bedtools.readthedocs.io/en/latest/content/installation.html)] (>= v2.25.0)

@@ -1,3 +1,5 @@
+# Written by Mathieu Quinodoz, Basel, Switzerland
+
 #!/bin/bash
 
 usage() { echo "## ERROR: Usage: $0 [--genome <hg19|hg38>] [--name <string>] [--minOntarget <0-Inf>] [--maxOntarget <minOntarget-Inf>] [--minOfftarget <0-Inf>] [--maxOfftarget <minOfftarget-Inf>] [--paddingOfftarget <0-Inf>]. Exit." 1>&2; exit 1; }

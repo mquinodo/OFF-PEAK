@@ -133,5 +133,5 @@ done
 echo "" >> $work/header.target.tsv
 cat $work/header.target.tsv $work/target.only.tsv > $work/ALL.target.tsv
 
-rm $work/temp.tsv $work/header.target.tsv $work/*.only.tsv $work/list.txt
+rm -f $work/temp.tsv $work/header.target.tsv $work/*.only.tsv $work/list.txt
 

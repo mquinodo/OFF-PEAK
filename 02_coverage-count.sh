@@ -113,12 +113,12 @@ echo "Step 2: Merging individual coverage files into one file"
 # processing of coverage files to merge them and add header
 printf "Chr\tbegin\tend\tname\tGC" > $work/header.target.tsv
 cut -f1-5 $targetsBED  > $work/target.only.tsv
-nb=$(wc -l $work/target.only.tsv)
+nb=$(wc -l $work/target.only.tsv | cut -f1 -d" ")
 
 for pat in $(cat $work/list.txt)
 do
 	echo "   Processing sample $pat"
-	nb2=$(wc -l $work/coverage/$pat.cov.tsv)
+	nb2=$(wc -l $work/coverage/$pat.cov.tsv | cut -f1 -d" ")
 	if [[ "$nb" != "$nb2" ]]; then
 		echo "## ERROR: coverage file coverage/$pat.cov.tsv is incomplete. Please check the file and rerun the script. Exit." 1>&2; exit 1;
 	fi

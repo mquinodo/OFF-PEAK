@@ -1,7 +1,7 @@
 # OFF-PEAK
 CNV detection tool for WES and targeted sequencing data.
 
-This software was written by Mathieu Quinodoz in the group of Prof. Rivolta from the IOB in Basel, Switzerland. It was developped on Ubuntu 22.04.1 LTS.
+This software was written by Mathieu Quinodoz in the group of Prof. Rivolta from the IOB in Basel, Switzerland. It was developped on Ubuntu 22.04.1 LTS. It is published in AJHG.
 
 ## Prerequisites
 + BEDTools [[Link](https://bedtools.readthedocs.io/en/latest/content/installation.html)] (>= v2.25.0)

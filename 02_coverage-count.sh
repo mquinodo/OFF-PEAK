@@ -1,3 +1,5 @@
+# Written by Mathieu Quinodoz, Basel, Switzerland
+
 #!/bin/bash
 
 nomosdepth() { echo "## ERROR: Mosdepth not found (--mosdepth). Exit." 1>&2; exit 1; }

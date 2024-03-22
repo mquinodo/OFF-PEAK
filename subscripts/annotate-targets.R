@@ -1,3 +1,4 @@
+# Written by Mathieu Quinodoz, Basel, Switzerland
 
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)

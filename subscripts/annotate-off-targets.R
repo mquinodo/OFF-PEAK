@@ -6,11 +6,9 @@ args = commandArgs(trailingOnly=TRUE)
 a=read.table(file=args[1],header=F)
 b=read.table(file=args[2],header=F)
 
-levelsa = levels (a[[4]])
-levelsb  = levels (b[[1]])
-union_levels <- union (levelsa, levelsb)
-a[,4] <- factor (a[,4], levels=union_levels)
-b[,1] <- factor (b[,1], levels=union_levels)
+lev <- unique(c(a[,4],b[,1]))
+a[,4] <- factor (a[,4], levels=lev)
+b[,1] <- factor (b[,1], levels=lev)
 
 com=which(is.element(a[,4],b[,1]))
 

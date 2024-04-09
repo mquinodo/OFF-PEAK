@@ -1,7 +1,10 @@
 # OFF-PEAK
 CNV detection tool for WES and targeted sequencing data.
 
+09.04.24 UPDATE: There was an error for the preprocessing step in R (error in ops.factor) because of the lack of "stringsAsFactors = FALSE". It has now been added to all scripts and subscripts.
+
 This software was written by Mathieu Quinodoz in the group of Prof. Rivolta from the IOB in Basel, Switzerland. It was developped on Ubuntu 22.04.1 LTS. It is published in AJHG.
+[[Link](https://doi.org/10.1016/j.ajhg.2024.03.001)]
 
 ## Prerequisites
 + BEDTools [[Link](https://bedtools.readthedocs.io/en/latest/content/installation.html)] (>= v2.25.0)

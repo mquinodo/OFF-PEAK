@@ -3,6 +3,7 @@
 #!/usr/bin/env Rscript
 
 library(optparse)
+stringsAsFactors = FALSE
 
 option_list = list(
   make_option(c("--output"), type="character", default="NA", 

@@ -1,6 +1,7 @@
 # Written by Mathieu Quinodoz, Basel, Switzerland
 
 #!/usr/bin/env Rscript
+stringsAsFactors = FALSE
 args = commandArgs(trailingOnly=TRUE)
 
 a=read.table(file=args[1],header=F)

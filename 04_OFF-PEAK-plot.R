@@ -1,7 +1,7 @@
 # Written by Mathieu Quinodoz, Basel, Switzerland
 
 #!/usr/bin/env Rscript
-
+stringsAsFactors = FALSE
 library(optparse)
 
 option_list = list(

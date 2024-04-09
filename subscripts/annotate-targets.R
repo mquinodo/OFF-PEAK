@@ -4,8 +4,8 @@
 stringsAsFactors = FALSE
 args = commandArgs(trailingOnly=TRUE)
 
-a=read.table(file=args[1],header=F)
-b=read.table(file=args[2],header=F)
+a=read.table(file=args[1],header=F,stringsAsFactors = FALSE)
+b=read.table(file=args[2],header=F,stringsAsFactors = FALSE)
 
 a=cbind(a,a[,4])
 a[,5]="No"

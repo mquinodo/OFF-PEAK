@@ -110,7 +110,7 @@ library(caTools) # for runmean function
 load(databasefile)
 
 # reading input files with readcounts
-dataALL=read.table(file=data,header=T)
+dataALL=read.table(file=data,header=T,stringsAsFactors = FALSE)
 
 # removing off-targets smaller than minOfftarget and without exons inside
 taken=which(grepl("NM",dataALL[,4])==T | as.numeric(dataALL[,3])-as.numeric(dataALL[,2])>minOfftarget)

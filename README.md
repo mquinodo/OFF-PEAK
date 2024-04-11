@@ -10,6 +10,16 @@ This software was written by Mathieu Quinodoz in the group of Prof. Rivolta from
 + BEDTools [[Link](https://bedtools.readthedocs.io/en/latest/content/installation.html)] (>= v2.25.0)
 + mosdepth [[Link](https://github.com/brentp/mosdepth)] (>= v0.3.3)
 + R [[Link](https://cran.r-project.org/mirrors.html)] (>= v3.2.0) with following libraries: optparse, gplots, ExomeDepth, pROC and caTools
+ExomeDepth library has been removed from CRAN. It can be installed the following way:
+```
+url <- "https://cran.r-project.org/src/contrib/Archive/ExomeDepth/ExomeDepth_1.1.16.tar.gz"
+pkgFile <- "ExomeDepth_1.1.16.tar.gz"
+download.file(url = url, destfile = pkgFile)
+untar(pkgFile)
+install.packages(c("Biostrings","IRanges","Rsamtools","GenomicRanges","aod","VGAM","GenomicAlignments","dplyr","magrittr"))
+install.packages(pkgs=pkgFile, type="source", repos=NULL)
+unlink(pkgFile)
+```
 
 ## Installation
 The tool does not require compilation.

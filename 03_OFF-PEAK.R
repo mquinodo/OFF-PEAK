@@ -81,25 +81,6 @@ if(databasefile=="NA"){
   stop("You need to include the database file with the --databasefile option. Exit.")
 }
 
-
-# folder="/home/mquinodo/SYNO/WES/EXOMES/Carmen_Igor/12_OFF-PEAK"
-# data="/home/mquinodo/SYNO/WES/EXOMES/Carmen_Igor/12_OFF-PEAK/ALL.target.tsv"
-# mincor=0.9
-# minsignal=2500
-# maxvar=-0.2
-# leaveoneout=1
-# downsample=20000
-# nbFake=500
-# stopPC=0.0001
-# minZ=4
-# minOfftarget=1000
-# databasefile="/home/mquinodo/SYNO/scripts_NGS_analysis/OFF-PEAK-train5/refs/data-hg19.RData"
-# genomePlots=TRUE
-# chromoPlots=TRUE
-# nbPlots=10
-
-
-
 # loading libraries
 library(gplots) # for heatmap.2 function
 library(ExomeDepth) # for C_hmm function

@@ -114,7 +114,7 @@ rm $work/targetsBED.bed $listBAM.temp
 echo "Step 2: Merging individual coverage files into one file"
 # processing of coverage files to merge them and add header
 printf "Chr\tbegin\tend\tname\tGC" > $work/header.target.tsv
-cut -f1-5 $targetsBED  > $work/target.only.tsv
+cut -f1-5 $targetsBED | awk -F"\t" '{if($1 ~ /^chr/) print $0; if($1 !~ /^chr/) print "chr" $0;}' > $work/target.only.tsv
 nb=$(wc -l $work/target.only.tsv | cut -f1 -d" ")
 
 for pat in $(cat $work/list.txt)

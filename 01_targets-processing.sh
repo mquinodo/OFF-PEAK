@@ -112,8 +112,8 @@ fi
 if [ ! -z "${nochr}" ]; then
     sed 's/chr//g' $file.tsv > $file.nochr.tsv
     sed 's/chr//g' $file2.tsv > $file2.nochr.tsv
-    file=$file.nochr.tsv
-    file2=$file2.nochr.tsv
+    file=$file.nochr
+    file2=$file2.nochr
 fi
 
 echo "Step 1: extracting exons from gene file and selected the targeted ones"

@@ -57,6 +57,7 @@ Option | Default | Value | Description
 --minOfftarget | 1 | 1 - Inf | Minimal size of off-targets. Smaller on-target regions will be discarded.
 --maxOfftarget | 50000 | > minOfftarget | Maximal size of off-targets. Larger on-target regions will be splitted into regions of equal size.
 --paddingOfftarget | 300 | 0 - Inf | Padding around on-target regions to avoid targeted reads to be counted in off-target regions.
+--nochr | --- | --- | Use if your BED file and your BAM files have the chromosome notation without "chr" like 1, 2,... instead of chr1, chr2,...
 
 
 ### 2) Coverage computation

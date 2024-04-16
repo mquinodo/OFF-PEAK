@@ -97,10 +97,10 @@ fi
 
 here="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-file=$here/data/${genome}_ncbiRefSeq.nochr
+file=$here/data/${genome}_ncbiRefSeq
 # NCBI genes (without .tsv)
 # downloaded here: http://genome.ucsc.edu/cgi-bin/hgTables ncbiRefSeq "all fields from sleected table"
-file2=$here/data/${genome}_ctgPos2.nochr
+file2=$here/data/${genome}_ctgPos2
 # Contigs (without.tsv)
 # downloaded here: http://genome.ucsc.edu/cgi-bin/hgTables MappindandSequencing Map Contigs
 

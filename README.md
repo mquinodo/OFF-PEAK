@@ -1,6 +1,7 @@
 # OFF-PEAK
 CNV detection tool for WES and targeted sequencing data.
 
+16.04.24 UPDATE: An option --nochr was added to allow the use of reference genome with chromosome notation without "chr".
 09.04.24 UPDATE: There was an error for the preprocessing step in R (error in ops.factor) because of the lack of "stringsAsFactors = FALSE". It has now been added to all scripts and subscripts.
 
 This software was written by Mathieu Quinodoz in the group of Prof. Rivolta from the IOB in Basel, Switzerland. It was developped on Ubuntu 22.04.1 LTS. It is published in AJHG.

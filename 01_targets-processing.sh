@@ -109,7 +109,7 @@ if [ ! -f "$file.tsv" ]; then
     gunzip -q $file.tsv.gz
 fi
 
-if [ -z "${nochr}" ]; then
+if [ ! -z "${nochr}" ]; then
     sed 's/chr//g' $file.tsv > $file.nochr.tsv
     sed 's/chr//g' $file2.tsv > $file2.nochr.tsv
     file=$file.nochr.tsv

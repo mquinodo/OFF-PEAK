@@ -2,7 +2,7 @@
 
 #!/bin/bash
 
-usage() { echo "## ERROR: Usage: $0 [--genome <hg19|hg38>] [--name <string>] [--minOntarget <0-Inf>] [--maxOntarget <minOntarget-Inf>] [--minOfftarget <0-Inf>] [--maxOfftarget <minOfftarget-Inf>] [--paddingOfftarget <0-Inf>]. Exit." 1>&2; exit 1; }
+usage() { echo "## ERROR: Usage: $0 [--genome <hg19|hg38>] [--name <string>] [--minOntarget <0-Inf>] [--maxOntarget <minOntarget-Inf>] [--minOfftarget <0-Inf>] [--maxOfftarget <minOfftarget-Inf>] [--paddingOfftarget <0-Inf>] [--nochr]. Exit." 1>&2; exit 1; }
 nogenome() { echo "## ERROR: You need to provide the genome version through --genome option (hg19 or hg38). Exit." 1>&2; exit 1; }
 noname() { echo "## ERROR: You need to provide an output name through --name option. Exit." 1>&2; exit 1; }
 notargets() { echo "## ERROR: You need to provide a bed file with targets with --targets option. Exit." 1>&2; exit 1; }
@@ -44,6 +44,9 @@ while getopts ":-:" o; do
                     ;;
                 ref)
                     ref="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                    ;;
+                nochr)
+                    nochr="Yes"
                     ;;
 				*)
             		usage
@@ -88,20 +91,29 @@ if [ -z "${paddingOfftarget}" ]; then
     paddingOfftarget=300
     echo " -> No use of --paddingOfftarget option, value set as default: 300"
 fi
-
+if [ ! -z "${nochr}" ]; then
+    echo " -> Chromosome notation without chr used"
+fi
 
 here="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-file=$here/data/${genome}_ncbiRefSeq
+file=$here/data/${genome}_ncbiRefSeq.nochr
 # NCBI genes (without .tsv)
 # downloaded here: http://genome.ucsc.edu/cgi-bin/hgTables ncbiRefSeq "all fields from sleected table"
-file2=$here/data/${genome}_ctgPos2
+file2=$here/data/${genome}_ctgPos2.nochr
 # Contigs (without.tsv)
 # downloaded here: http://genome.ucsc.edu/cgi-bin/hgTables MappindandSequencing Map Contigs
 
 if [ ! -f "$file.tsv" ]; then
     echo "Unzipping of the gene file."
     gunzip -q $file.tsv.gz
+fi
+
+if [ -z "${nochr}" ]; then
+    sed 's/chr//g' $file.tsv > $file.nochr.tsv
+    sed 's/chr//g' $file2.tsv > $file2.nochr.tsv
+    file=$file.nochr.tsv
+    file2=$file2.nochr.tsv
 fi
 
 echo "Step 1: extracting exons from gene file and selected the targeted ones"
@@ -136,7 +148,7 @@ awk -F"\t" -v paddingOfftarget=$paddingOfftarget '{print $1 "\t" $2-paddingOffta
 
 echo "Step 5: spliting off-targets larger than --maxOfftarget"
 # removing alternative contigs
-awk -F"\t" '{print $3 "\t" $4 "\t" $5}' $file2.tsv | grep -v -P "_|chrM" | grep -v "chrom" > $file2.$name.bed
+awk -F"\t" '{print $3 "\t" $4 "\t" $5}' $file2.tsv | grep -v -P "_|^M|chrM" | grep -v "chrom" > $file2.$name.bed
 bedtools sort -i $file2.$name.bed > $file2.$name.sort.bed
 # substract padded exons from the genome
 bedtools subtract -a $file2.$name.sort.bed -b $file.$name.exons.final.padded.bed > $file2.$name.sort.notar.bed
@@ -165,7 +177,7 @@ awk -F"\t" -v minOfftarget=$minOfftarget '{if(($3-$2)>minOfftarget) print $0}' $
 echo "Step 8: writing output"
 cat $here/data/$name.hg19_both.sort.noncoding.part1.filt.bed $here/data/$name.hg19_both.sort.noncoding.part3.bed > $here/data/$name.hg19_both.sort.noncoding.partall.bed
 bedtools sort -i $here/data/$name.hg19_both.sort.noncoding.partall.bed > $here/data/$name.hg19_both.sort.noncoding.partall.sort.bed
-grep -v -P "^chrY" $here/data/$name.hg19_both.sort.noncoding.partall.sort.bed > $here/data/$name.temp
+grep -v -P "^Y|chrY" $here/data/$name.hg19_both.sort.noncoding.partall.sort.bed > $here/data/$name.temp
 
 echo "Step 9: annotating GC content"
 awk -F"\t" '{a=int(($2+$3)/2); c1=a-10000; c2=a+10000; if(c1<1){c1=1}; print $1 "\t" c1 "\t" c2 "\t" $4}' $here/data/$name.temp > $here/data/$name.temp2

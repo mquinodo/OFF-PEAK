@@ -148,7 +148,7 @@ awk -F"\t" -v paddingOfftarget=$paddingOfftarget '{print $1 "\t" $2-paddingOffta
 
 echo "Step 5: spliting off-targets larger than --maxOfftarget"
 # removing alternative contigs
-awk -F"\t" '{print $3 "\t" $4 "\t" $5}' $file2.tsv | grep -v -P "_|^M|chrM" | grep -v "chrom" > $file2.$name.bed
+awk -F"\t" '{print $3 "\t" $4 "\t" $5}' $file2.tsv | grep -E -v "_|^M|chrM" | grep -v "chrom" > $file2.$name.bed
 bedtools sort -i $file2.$name.bed > $file2.$name.sort.bed
 # substract padded exons from the genome
 bedtools subtract -a $file2.$name.sort.bed -b $file.$name.exons.final.padded.bed > $file2.$name.sort.notar.bed
@@ -177,7 +177,7 @@ awk -F"\t" -v minOfftarget=$minOfftarget '{if(($3-$2)>minOfftarget) print $0}' $
 echo "Step 8: writing output"
 cat $here/data/$name.hg19_both.sort.noncoding.part1.filt.bed $here/data/$name.hg19_both.sort.noncoding.part3.bed > $here/data/$name.hg19_both.sort.noncoding.partall.bed
 bedtools sort -i $here/data/$name.hg19_both.sort.noncoding.partall.bed > $here/data/$name.hg19_both.sort.noncoding.partall.sort.bed
-grep -v -P "^Y|chrY" $here/data/$name.hg19_both.sort.noncoding.partall.sort.bed > $here/data/$name.temp
+grep -E -v "^Y|chrY" $here/data/$name.hg19_both.sort.noncoding.partall.sort.bed > $here/data/$name.temp
 
 echo "Step 9: annotating GC content"
 awk -F"\t" '{a=int(($2+$3)/2); c1=a-10000; c2=a+10000; if(c1<1){c1=1}; print $1 "\t" c1 "\t" c2 "\t" $4}' $here/data/$name.temp > $here/data/$name.temp2

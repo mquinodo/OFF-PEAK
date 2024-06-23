@@ -974,7 +974,7 @@ returnAUC <- function(all,fakeCNV) {
   # plotting heatmap of correlation and writing output to text file
   pdf(file=paste(folder,"/01_general-stats/Heatmap-correlations-all.pdf",sep=""),width=7,height=7)
   par(mfrow=c(1,1))
-  heatmap.2(correlation,cexRow=0.1,cexCol=0.1,breaks=seq(min(correlation), 1, length.out=71),trace="none", col = colorRampPalette(c("red","orange", "yellow", "green"))(n = 70))
+  heatmap.2(correlation,cexRow=0.1,cexCol=0.1,breaks=seq(min(max(min(correlation),0),0.95), 1, length.out=71),trace="none", col = colorRampPalette(c("red","orange", "yellow", "green"))(n = 70))
   dev.off()
   correlation2=cbind(rownames(correlation),correlation)
   correlation2=rbind(colnames(correlation2),correlation2)

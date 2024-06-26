@@ -2356,122 +2356,124 @@ if(dim(TARsave)[1]>0){
       }
   }
 
-  # annotation of ClinVar Pathogenic
-  del=grepl("deletion",ClinVar[,4])
-  dup=grepl("duplication",ClinVar[,4])
-  for (i in 1:dim(TARsave)[1]){
-    type=TARsave[i,23]
-    if(TARsave[i,23]=="duplication"){
-      j1=which(ClinVar[,1]==TARsave[i,1] & as.numeric(ClinVar[,2])>as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])<as.numeric(TARsave[i,3]) & dup==T)
-      j2=which(ClinVar[,1]==TARsave[i,1] & ((as.numeric(ClinVar[,2])>as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])<as.numeric(TARsave[i,3])) | (as.numeric(ClinVar[,2])<as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])>as.numeric(TARsave[i,2]))  | (as.numeric(ClinVar[,2])<as.numeric(TARsave[i,3]) & as.numeric(ClinVar[,3])>as.numeric(TARsave[i,3])) | (as.numeric(ClinVar[,2])<as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])>as.numeric(TARsave[i,3]))) & dup==T)
+  if(dim(TARsave)[1]>0){
+
+    # annotation of ClinVar Pathogenic
+    del=grepl("deletion",ClinVar[,4])
+    dup=grepl("duplication",ClinVar[,4])
+    for (i in 1:dim(TARsave)[1]){
+      type=TARsave[i,23]
+      if(TARsave[i,23]=="duplication"){
+        j1=which(ClinVar[,1]==TARsave[i,1] & as.numeric(ClinVar[,2])>as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])<as.numeric(TARsave[i,3]) & dup==T)
+        j2=which(ClinVar[,1]==TARsave[i,1] & ((as.numeric(ClinVar[,2])>as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])<as.numeric(TARsave[i,3])) | (as.numeric(ClinVar[,2])<as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])>as.numeric(TARsave[i,2]))  | (as.numeric(ClinVar[,2])<as.numeric(TARsave[i,3]) & as.numeric(ClinVar[,3])>as.numeric(TARsave[i,3])) | (as.numeric(ClinVar[,2])<as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])>as.numeric(TARsave[i,3]))) & dup==T)
+      }
+      if(TARsave[i,23]=="deletion"){
+        j1=which(ClinVar[,1]==TARsave[i,1] & as.numeric(ClinVar[,2])>as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])<as.numeric(TARsave[i,3]) & del==T)
+        j2=which(ClinVar[,1]==TARsave[i,1] & ((as.numeric(ClinVar[,2])>as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])<as.numeric(TARsave[i,3])) | (as.numeric(ClinVar[,2])<as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])>as.numeric(TARsave[i,2]))  | (as.numeric(ClinVar[,2])<as.numeric(TARsave[i,3]) & as.numeric(ClinVar[,3])>as.numeric(TARsave[i,3])) | (as.numeric(ClinVar[,2])<as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])>as.numeric(TARsave[i,3]))) & del==T)
+      }
+      if(length(j1)>0){
+          TARsave[i,27]=paste(ClinVar[j1,4],collapse=",")
+      } else {
+          TARsave[i,27]="-"
+      }
+      if(length(j2)>0){
+          TARsave[i,30]=paste(ClinVar[j2,4],collapse=",")
+      } else {
+          TARsave[i,30]="-"
+      }
     }
-    if(TARsave[i,23]=="deletion"){
-      j1=which(ClinVar[,1]==TARsave[i,1] & as.numeric(ClinVar[,2])>as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])<as.numeric(TARsave[i,3]) & del==T)
-      j2=which(ClinVar[,1]==TARsave[i,1] & ((as.numeric(ClinVar[,2])>as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])<as.numeric(TARsave[i,3])) | (as.numeric(ClinVar[,2])<as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])>as.numeric(TARsave[i,2]))  | (as.numeric(ClinVar[,2])<as.numeric(TARsave[i,3]) & as.numeric(ClinVar[,3])>as.numeric(TARsave[i,3])) | (as.numeric(ClinVar[,2])<as.numeric(TARsave[i,2]) & as.numeric(ClinVar[,3])>as.numeric(TARsave[i,3]))) & del==T)
+
+    # annotation of ncRNA
+    for (i in 1:dim(TARsave)[1]){
+      j1=which(ncRNA[,1]==TARsave[i,1] & as.numeric(ncRNA[,2])>as.numeric(TARsave[i,2]) & as.numeric(ncRNA[,3])<as.numeric(TARsave[i,3]))
+      j2=which(ncRNA[,1]==TARsave[i,1] & as.numeric(ncRNA[,2])<as.numeric(TARsave[i,2]) & as.numeric(ncRNA[,3])>as.numeric(TARsave[i,2]))
+      j3=which(ncRNA[,1]==TARsave[i,1] & as.numeric(ncRNA[,2])<as.numeric(TARsave[i,3]) & as.numeric(ncRNA[,3])>as.numeric(TARsave[i,3]))
+      j4=which(ncRNA[,1]==TARsave[i,1] & as.numeric(ncRNA[,2])<as.numeric(TARsave[i,2]) & as.numeric(ncRNA[,3])>as.numeric(TARsave[i,3]))
+      j5=c(j1,j2,j3,j4)
+      if(length(j5)>0){
+          TARsave[i,28]=paste(ncRNA[j5,4],collapse=",")
+        } else {
+          TARsave[i,28]="-"
+        }
     }
-    if(length(j1)>0){
-        TARsave[i,27]=paste(ClinVar[j1,4],collapse=",")
+
+    # annotation of all gnomAD-CNV
+    for (i in 1:dim(TARsave)[1]){
+      j1=which(gnomAD2[,1]==TARsave[i,1] & as.numeric(gnomAD2[,2])<as.numeric(TARsave[i,2]) & as.numeric(gnomAD2[,3])>as.numeric(TARsave[i,3]))
+      if(length(j1)>0){
+          TARsave[i,29]=paste(gnomAD2[j1,4],collapse=",")
+        } else {
+          TARsave[i,29]="-"
+        }
+    }
+
+    # annotation of number of targets from chromosome ends
+    ex=unique(exons[,1:3])
+    for (i in 1:dim(TARsave)[1]){
+      TARsave[i,38]=length(which(ex[,1]==TARsave[i,1] & as.numeric(ex[,2])<as.numeric(TARsave[i,2])))
+      TARsave[i,39]=length(which(ex[,1]==TARsave[i,1] & as.numeric(ex[,3])>as.numeric(TARsave[i,3])))
+    }
+
+    # RefSeq Functional Element Features
+    for (i in 1:dim(TARsave)[1]){
+      j1=which(FEfeats[,1]==TARsave[i,1] & as.numeric(FEfeats[,2])>as.numeric(TARsave[i,2]) & as.numeric(FEfeats[,3])<as.numeric(TARsave[i,3]))
+      j2=which(FEfeats[,1]==TARsave[i,1] & as.numeric(FEfeats[,2])<as.numeric(TARsave[i,2]) & as.numeric(FEfeats[,3])>as.numeric(TARsave[i,2]))
+      j3=which(FEfeats[,1]==TARsave[i,1] & as.numeric(FEfeats[,2])<as.numeric(TARsave[i,3]) & as.numeric(FEfeats[,3])>as.numeric(TARsave[i,3]))
+      j4=which(FEfeats[,1]==TARsave[i,1] & as.numeric(FEfeats[,2])<as.numeric(TARsave[i,2]) & as.numeric(FEfeats[,3])>as.numeric(TARsave[i,3]))
+      j5=c(j1,j2,j3,j4)
+      if(length(j5)>0){
+          TARsave[i,40]=paste(FEfeats[j5,4],collapse=",")
+        } else {
+          TARsave[i,40]="-"
+        }
+    }
+
+    # QUAL
+    TARsave[,32]=round((1/as.numeric(TARsave[,32])),digits=2)
+    TARsave[which(TARsave[,32]=="Inf"),32]=10000
+    TARsave[,33]=round(abs(as.numeric(TARsave[,10]))/as.numeric(TARsave[,16]),digits=2)
+    TARsave[,25]=round(as.numeric(TARsave[,25]),digits=2)
+
+    # sorting by QUAL
+    TARsave=TARsave[sort(abs(as.numeric(TARsave[,10])),index.return=T,decreasing=T)$ix,]
+
+    # writing outputs
+    cols=c(5,1:3,34:35,23,24,16,4,22,31,36,28,40,21,26,29,11:14,10,25,32,33,20,18,27,30,38:39)
+    sel=which(TARsave[,23]!="normal")
+    write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.tsv",sep=""),quote=F,sep="\t",row.names=F)
+    sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3)
+    write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.tsv",sep=""),quote=F,sep="\t",row.names=F)
+    sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & as.numeric(TARsave[,21])==0)
+    write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.unique.tsv",sep=""),quote=F,sep="\t",row.names=F)
+
+    varav=mean(as.numeric(sampleinfo[,6]))
+    varsd=sd(as.numeric(sampleinfo[,6]))
+    lowqual=which(abs((as.numeric(sampleinfo[,6])-varav)/varsd)>2)
+    if(length(lowqual)>0){
+        good=as.character(sampleinfo[-lowqual,1])
     } else {
-        TARsave[i,27]="-"
+        good=as.character(sampleinfo[,1])
     }
-    if(length(j2)>0){
-        TARsave[i,30]=paste(ClinVar[j2,4],collapse=",")
-    } else {
-        TARsave[i,30]="-"
+    sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & as.numeric(TARsave[,21])==0 & is.element(TARsave[,5],good))
+    write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.unique.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
+    sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & is.element(TARsave[,5],good))
+    write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
+    sel=which(TARsave[,23]!="normal" & is.element(TARsave[,5],good))
+    write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
+
+    # BED file for IGV
+    bed=TARsave[,c(1:3,5,23)]
+    for(i in 1:dim(bed)[1]){
+      bed[i,4]=paste(bed[i,4],"_",bed[i,5],sep="")
     }
+    write.table(bed[,1:4],file=paste(folder,"/02_BED-files/CNVs-targets-only-IGV.bed",sep=""),quote=F,sep="\t",row.names=F,col.names=F)
+
+    # BED file for AnnotSV
+    bed=TARsave[,c(1:3,5,23)]
+    bed[which(bed[,5]=="duplication"),5]="DUP"
+    bed[which(bed[,5]=="deletion"),5]="DEL"
+    write.table(bed[which(bed[,5]=="DUP" | bed[,5]=="DEL"),c(1,2,3,5,4)],file=paste(folder,"/02_BED-files/CNVs-targets-only-AnnotSV.bed",sep=""),quote=F,sep="\t",row.names=F,col.names=F)
   }
-
-  # annotation of ncRNA
-  for (i in 1:dim(TARsave)[1]){
-    j1=which(ncRNA[,1]==TARsave[i,1] & as.numeric(ncRNA[,2])>as.numeric(TARsave[i,2]) & as.numeric(ncRNA[,3])<as.numeric(TARsave[i,3]))
-    j2=which(ncRNA[,1]==TARsave[i,1] & as.numeric(ncRNA[,2])<as.numeric(TARsave[i,2]) & as.numeric(ncRNA[,3])>as.numeric(TARsave[i,2]))
-    j3=which(ncRNA[,1]==TARsave[i,1] & as.numeric(ncRNA[,2])<as.numeric(TARsave[i,3]) & as.numeric(ncRNA[,3])>as.numeric(TARsave[i,3]))
-    j4=which(ncRNA[,1]==TARsave[i,1] & as.numeric(ncRNA[,2])<as.numeric(TARsave[i,2]) & as.numeric(ncRNA[,3])>as.numeric(TARsave[i,3]))
-    j5=c(j1,j2,j3,j4)
-    if(length(j5)>0){
-        TARsave[i,28]=paste(ncRNA[j5,4],collapse=",")
-      } else {
-        TARsave[i,28]="-"
-      }
-  }
-
-  # annotation of all gnomAD-CNV
-  for (i in 1:dim(TARsave)[1]){
-    j1=which(gnomAD2[,1]==TARsave[i,1] & as.numeric(gnomAD2[,2])<as.numeric(TARsave[i,2]) & as.numeric(gnomAD2[,3])>as.numeric(TARsave[i,3]))
-    if(length(j1)>0){
-        TARsave[i,29]=paste(gnomAD2[j1,4],collapse=",")
-      } else {
-        TARsave[i,29]="-"
-      }
-  }
-
-  # annotation of number of targets from chromosome ends
-  ex=unique(exons[,1:3])
-  for (i in 1:dim(TARsave)[1]){
-    TARsave[i,38]=length(which(ex[,1]==TARsave[i,1] & as.numeric(ex[,2])<as.numeric(TARsave[i,2])))
-    TARsave[i,39]=length(which(ex[,1]==TARsave[i,1] & as.numeric(ex[,3])>as.numeric(TARsave[i,3])))
-  }
-
-  # RefSeq Functional Element Features
-  for (i in 1:dim(TARsave)[1]){
-    j1=which(FEfeats[,1]==TARsave[i,1] & as.numeric(FEfeats[,2])>as.numeric(TARsave[i,2]) & as.numeric(FEfeats[,3])<as.numeric(TARsave[i,3]))
-    j2=which(FEfeats[,1]==TARsave[i,1] & as.numeric(FEfeats[,2])<as.numeric(TARsave[i,2]) & as.numeric(FEfeats[,3])>as.numeric(TARsave[i,2]))
-    j3=which(FEfeats[,1]==TARsave[i,1] & as.numeric(FEfeats[,2])<as.numeric(TARsave[i,3]) & as.numeric(FEfeats[,3])>as.numeric(TARsave[i,3]))
-    j4=which(FEfeats[,1]==TARsave[i,1] & as.numeric(FEfeats[,2])<as.numeric(TARsave[i,2]) & as.numeric(FEfeats[,3])>as.numeric(TARsave[i,3]))
-    j5=c(j1,j2,j3,j4)
-    if(length(j5)>0){
-        TARsave[i,40]=paste(FEfeats[j5,4],collapse=",")
-      } else {
-        TARsave[i,40]="-"
-      }
-  }
-
-  # QUAL
-  TARsave[,32]=round((1/as.numeric(TARsave[,32])),digits=2)
-  TARsave[which(TARsave[,32]=="Inf"),32]=10000
-  TARsave[,33]=round(abs(as.numeric(TARsave[,10]))/as.numeric(TARsave[,16]),digits=2)
-  TARsave[,25]=round(as.numeric(TARsave[,25]),digits=2)
-
-  # sorting by QUAL
-  TARsave=TARsave[sort(abs(as.numeric(TARsave[,10])),index.return=T,decreasing=T)$ix,]
-
-  # writing outputs
-  cols=c(5,1:3,34:35,23,24,16,4,22,31,36,28,40,21,26,29,11:14,10,25,32,33,20,18,27,30,38:39)
-  sel=which(TARsave[,23]!="normal")
-  write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.tsv",sep=""),quote=F,sep="\t",row.names=F)
-  sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3)
-  write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.tsv",sep=""),quote=F,sep="\t",row.names=F)
-  sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & as.numeric(TARsave[,21])==0)
-  write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.unique.tsv",sep=""),quote=F,sep="\t",row.names=F)
-
-  varav=mean(as.numeric(sampleinfo[,6]))
-  varsd=sd(as.numeric(sampleinfo[,6]))
-  lowqual=which(abs((as.numeric(sampleinfo[,6])-varav)/varsd)>2)
-  if(length(lowqual)>0){
-      good=as.character(sampleinfo[-lowqual,1])
-  } else {
-      good=as.character(sampleinfo[,1])
-  }
-  sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & as.numeric(TARsave[,21])==0 & is.element(TARsave[,5],good))
-  write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.unique.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
-  sel=which(abs(as.numeric(TARsave[,10]))>5 & TARsave[,24]!="2" & as.numeric(TARsave[,25])>2 & as.numeric(TARsave[,32])>2.5 & as.numeric(TARsave[,33])>3 & is.element(TARsave[,5],good))
-  write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
-  sel=which(TARsave[,23]!="normal" & is.element(TARsave[,5],good))
-  write.table(TARsave[sel,cols],file=paste(folder,"/04_CNVs-results/CNVs-targets-only.HQ-sample.tsv",sep=""),quote=F,sep="\t",row.names=F)
-
-  # BED file for IGV
-  bed=TARsave[,c(1:3,5,23)]
-  for(i in 1:dim(bed)[1]){
-    bed[i,4]=paste(bed[i,4],"_",bed[i,5],sep="")
-  }
-  write.table(bed[,1:4],file=paste(folder,"/02_BED-files/CNVs-targets-only-IGV.bed",sep=""),quote=F,sep="\t",row.names=F,col.names=F)
-
-  # BED file for AnnotSV
-  bed=TARsave[,c(1:3,5,23)]
-  bed[which(bed[,5]=="duplication"),5]="DUP"
-  bed[which(bed[,5]=="deletion"),5]="DEL"
-  write.table(bed[which(bed[,5]=="DUP" | bed[,5]=="DEL"),c(1,2,3,5,4)],file=paste(folder,"/02_BED-files/CNVs-targets-only-AnnotSV.bed",sep=""),quote=F,sep="\t",row.names=F,col.names=F)
-
 
   # writing individual outputs and doing plots for best CNVs
   for (pat in colnames(dataALL)[5:num]){

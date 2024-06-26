@@ -99,7 +99,7 @@ do
 		# -n = no-per-base; -t = threads; -Q mapq; precision is for rounding of numbers
 		# gives the average per base coverage
 		export MOSDEPTH_PRECISION=10
-		$mosdepth  -n -t 2 -Q 50 -b $work/targetsBED.bed $work/$pat $bam
+		$mosdepth  -n -t 2 -Q 20 -b $work/targetsBED.bed $work/$pat $bam
 		zcat $work/$pat.regions.bed.gz > $work/$pat.regions.bed
 		# remultiply the per-base average by the size to have the total coverage
 		mkdir -p $work/coverage

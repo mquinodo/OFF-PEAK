@@ -93,8 +93,8 @@ Rscript 03_OFF-PEAK.R
 #### Required arguments
 Option | Value | Description
 --- | --- | ---
---output | STRING | BED file containing the target regions of the exome or targeted sequencing
---data | STRING | Genome build used
+--output | STRING | Output directory
+--data | STRING | Output of step 2
 --databasefile | STRING | Absolute path to RData file containing various information found in data folder (data-hg19.RData or data-hg38.RData)
 
 #### Optional arguments
